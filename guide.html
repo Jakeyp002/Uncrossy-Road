@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reversy Guide</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #75d463;
+        color: #17201f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 28px;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.18) 2px, transparent 2px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.18) 2px, transparent 2px),
+          #75d463;
+        background-size: 46px 46px;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+
+      header,
+      section {
+        margin-bottom: 18px;
+        padding: 18px;
+        border: 4px solid #17201f;
+        border-radius: 8px;
+        background: #fff9df;
+        box-shadow: 0 8px 0 rgba(23, 32, 31, 0.18);
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        font-size: clamp(34px, 6vw, 64px);
+        color: #e03d37;
+        text-shadow: 3px 3px 0 #fff26b;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 28px;
+      }
+
+      p {
+        margin: 10px 0 0;
+        font-weight: 800;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f6f1dc;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 2px solid #17201f;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #17201f;
+        color: #fff8df;
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      td {
+        font-weight: 800;
+      }
+
+      .pill {
+        display: inline-block;
+        min-width: 52px;
+        padding: 4px 7px;
+        border-radius: 8px;
+        background: #fff26b;
+        text-align: center;
+        font-weight: 950;
+      }
+
+      .note {
+        background: #39d9cc;
+      }
+
+      a {
+        color: #17201f;
+        font-weight: 950;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 12px;
+        }
+
+        header,
+        section {
+          padding: 12px;
+        }
+
+        table,
+        thead,
+        tbody,
+        tr,
+        th,
+        td {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tr {
+          margin-bottom: 10px;
+          border: 2px solid #17201f;
+          background: #f6f1dc;
+        }
+
+        td {
+          border: 0;
+          border-bottom: 1px solid rgba(23, 32, 31, 0.18);
+        }
+
+        td::before {
+          content: attr(data-label);
+          display: block;
+          margin-bottom: 3px;
+          font-size: 11px;
+          font-weight: 950;
+          text-transform: uppercase;
+          opacity: 0.65;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Reversy Guide</h1>
+        <p>Cars, upgrades, chickens, and boss rules for Uncrossy Road. All run-shop upgrades are temporary, and cash, upgrades, and roadblock uses reset after game over.</p>
+        <p><a href="./index.html">Back to Uncrossy Road</a></p>
+      </header>
+
+      <section>
+        <h2>Vehicles</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Vehicle</th>
+              <th>Hotkey</th>
+              <th>Cost</th>
+              <th>Cooldown</th>
+              <th>Speed</th>
+              <th>Damage</th>
+              <th>Coverage</th>
+              <th>Best Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Vehicle">Small Car</td>
+              <td data-label="Hotkey"><span class="pill">1</span></td>
+              <td data-label="Cost">$8, down to $3 with Cheaper Cars</td>
+              <td data-label="Cooldown">0.42 seconds</td>
+              <td data-label="Speed">690</td>
+              <td data-label="Damage">1</td>
+              <td data-label="Coverage">Narrow, one lane</td>
+              <td data-label="Best Use">Cheap reaction shots when money is tight.</td>
+            </tr>
+            <tr>
+              <td data-label="Vehicle">Truck</td>
+              <td data-label="Hotkey"><span class="pill">2</span></td>
+              <td data-label="Cost">$10</td>
+              <td data-label="Cooldown">0.78 seconds, lowered by Truck Rush</td>
+              <td data-label="Speed">475</td>
+              <td data-label="Damage">2</td>
+              <td data-label="Coverage">Wider, one lane</td>
+              <td data-label="Best Use">Reliable hits against tougher chickens.</td>
+            </tr>
+            <tr>
+              <td data-label="Vehicle">Bus</td>
+              <td data-label="Hotkey"><span class="pill">3</span></td>
+              <td data-label="Cost">$15</td>
+              <td data-label="Cooldown">1.35 seconds</td>
+              <td data-label="Speed">365</td>
+              <td data-label="Damage">3</td>
+              <td data-label="Coverage">Long one-lane sweep, extended by Long Bus</td>
+              <td data-label="Best Use">Clearing a busy lane or lining up combo splats.</td>
+            </tr>
+            <tr>
+              <td data-label="Vehicle">Snow Plow</td>
+              <td data-label="Hotkey"><span class="pill">4</span></td>
+              <td data-label="Cost">$20</td>
+              <td data-label="Cooldown">2.4 seconds, lowered by Plow Tune</td>
+              <td data-label="Speed">235</td>
+              <td data-label="Damage">3</td>
+              <td data-label="Coverage">Slow sweep across two paired lanes</td>
+              <td data-label="Best Use">Two-lane pressure relief when chickens stack up.</td>
+            </tr>
+            <tr>
+              <td data-label="Vehicle">Roadblock Car</td>
+              <td data-label="Hotkey"><span class="pill">5</span></td>
+              <td data-label="Cost">$50</td>
+              <td data-label="Cooldown">4 seconds</td>
+              <td data-label="Speed">285</td>
+              <td data-label="Damage">999, but bosses ignore one-tap effects</td>
+              <td data-label="Coverage">Huge one-lane emergency sweep, 3 uses per run</td>
+              <td data-label="Best Use">Expensive panic button for a lane that is about to leak.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Chickens</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Chicken</th>
+              <th>Appears</th>
+              <th>Health</th>
+              <th>Speed</th>
+              <th>Reward</th>
+              <th>Escape Damage</th>
+              <th>Special Rule</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Chicken">Chicken</td>
+              <td data-label="Appears">Immediately</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">118</td>
+              <td data-label="Reward">$6</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">The basic fast runner. Barbed wire can stop it.</td>
+            </tr>
+            <tr>
+              <td data-label="Chicken">Darter</td>
+              <td data-label="Appears">As difficulty rises</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">170</td>
+              <td data-label="Reward">$8</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Small and very quick, so timing matters more.</td>
+            </tr>
+            <tr>
+              <td data-label="Chicken">Bruiser</td>
+              <td data-label="Appears">After early difficulty</td>
+              <td data-label="Health">2</td>
+              <td data-label="Speed">105</td>
+              <td data-label="Reward">$12</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Survives one small-car hit and ignores barbed wire because it has more than 1 health.</td>
+            </tr>
+            <tr>
+              <td data-label="Chicken">Jumper</td>
+              <td data-label="Appears">Very rare after 3:00</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">72</td>
+              <td data-label="Reward">$11</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Extremely slow, but hops over mud instead of being slowed by it.</td>
+            </tr>
+            <tr>
+              <td data-label="Chicken">Mud Chicken</td>
+              <td data-label="Appears">Rare after 4:00</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">112</td>
+              <td data-label="Reward">$10</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Completely ignores mud slowdown.</td>
+            </tr>
+            <tr>
+              <td data-label="Chicken">Boss Chicken</td>
+              <td data-label="Appears">At 2:30</td>
+              <td data-label="Health">20</td>
+              <td data-label="Speed">118 x 0.125</td>
+              <td data-label="Reward">$48</td>
+              <td data-label="Escape Damage">5</td>
+              <td data-label="Special Rule">Clears the road when it arrives, ignores mud, resists one-tap effects, and costs 5 escapes if it crosses.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Run-Shop Upgrades</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Upgrade</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Max</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Upgrade">Cheaper Cars</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$18, $30, $41</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Small car cost is multiplied by 0.70 each level, with a $3 minimum.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Truck Rush</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$22, $36, $51</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Truck cooldown is multiplied by 0.70 each level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Long Bus</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$24, $40, $55</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Bus length is multiplied by 1.32 each level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Plow Tune</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$28, $46, $64</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Snow plow cooldown is multiplied by 0.65 each level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Loose Change</td>
+              <td data-label="Category">Economy</td>
+              <td data-label="Price">$18, $30, $41</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Each splat pays $1 more per level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Better Interest</td>
+              <td data-label="Category">Economy</td>
+              <td data-label="Price">$16, $26, $37</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Break interest gains +25% multiplier per level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Combo Ledger</td>
+              <td data-label="Category">Economy</td>
+              <td data-label="Price">$14, $23, $32</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Combo bonus pays $1 more per combo step per level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Break Grant</td>
+              <td data-label="Category">Economy</td>
+              <td data-label="Price">$20, $33, $46</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Every shop break gives +$8 flat cash per level, on top of interest.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Deeper Mud</td>
+              <td data-label="Category">Map</td>
+              <td data-label="Price">$30, $50, $69</td>
+              <td data-label="Max">3</td>
+              <td data-label="Effect">Mud slow multiplier drops by 0.05 each level, down to 0.10x minimum.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Mud Patch</td>
+              <td data-label="Category">Map</td>
+              <td data-label="Price">$40, $66</td>
+              <td data-label="Max">2</td>
+              <td data-label="Effect">Adds one extra muddy lane per level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Safer Curbs</td>
+              <td data-label="Category">Map</td>
+              <td data-label="Price">$44, $73</td>
+              <td data-label="Max">2</td>
+              <td data-label="Effect">Escape limit increases by 2 per level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Restock Wire</td>
+              <td data-label="Category">Map</td>
+              <td data-label="Price">$18</td>
+              <td data-label="Max">Repeatable when wire is broken</td>
+              <td data-label="Effect">Reloads the final-row barbed wire trap so it can pop three normal chickens again.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">Upgrade prices use this run formula: base price x (1 + current level x 0.65), rounded to the nearest dollar.</p>
+      </section>
+    </main>
+  </body>
+</html>

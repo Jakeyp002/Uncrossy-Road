@@ -1,0 +1,162 @@
+import { CHICKENS, WORLD } from "../config.js";
+import { rand } from "../utils.js";
+
+export class ChickenSystem {
+  constructor(economy, effects, audio, upgrades) {
+    this.economy = economy;
+    this.effects = effects;
+    this.audio = audio;
+    this.upgrades = upgrades;
+    this.reset();
+  }
+
+  reset() {
+    this.items = [];
+    this.escaped = 0;
+    this.nextId = 1;
+    this.seenTypes = new Set();
+  }
+
+  spawn(typeId, difficulty = 0) {
+    const type = CHICKENS[typeId];
+    this.seenTypes.add(typeId);
+    const sidePadding = 78;
+    const chicken = {
+      id: this.nextId,
+      typeId,
+      x: rand(sidePadding, WORLD.width - sidePadding),
+      y: -28,
+      baseX: 0,
+      vx: rand(-18, 18),
+      vy: type.speed + difficulty * 12 + rand(-12, 18),
+      radius: type.radius,
+      hp: type.hp,
+      maxHp: type.hp,
+      reward: type.reward,
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(6, 10),
+      panic: rand(0.6, 1.25),
+      dead: false,
+      escaped: false,
+      squash: 0
+    };
+    chicken.baseX = chicken.x;
+    this.nextId += 1;
+    this.items.push(chicken);
+  }
+
+  clearForBoss() {
+    if (this.items.length === 0) return;
+    this.items = [];
+    this.effects.shake(10);
+    this.effects.flashText("BOSS CLEARS ROAD", WORLD.width * 0.5, WORLD.roadTop + 28, "#ffdf65");
+  }
+
+  update(dt, difficulty) {
+    for (const chicken of this.items) {
+      if (chicken.dead) continue;
+      chicken.wobble += chicken.wobbleSpeed * dt;
+      chicken.squash = Math.max(0, chicken.squash - dt * 8);
+      const zig = Math.sin(chicken.wobble) * 16 * chicken.panic;
+      chicken.x += (chicken.vx + zig) * dt;
+      const surfaceMultiplier = this.getSurfaceMultiplier(chicken);
+      const type = CHICKENS[chicken.typeId];
+      const speedMultiplier = type.speedMultiplier ?? 1;
+      chicken.y += (chicken.vy + difficulty * 1.4) * speedMultiplier * surfaceMultiplier * dt;
+      this.checkBarbedWire(chicken);
+
+      if (chicken.x < 36 || chicken.x > WORLD.width - 36) {
+        chicken.vx *= -0.8;
+        chicken.x = Math.max(36, Math.min(WORLD.width - 36, chicken.x));
+      }
+
+      if (chicken.y > WORLD.height + 42 && !chicken.escaped) {
+        chicken.escaped = true;
+        const type = CHICKENS[chicken.typeId];
+        const escapeDamage = type.escapeDamage ?? 1;
+        this.escaped += escapeDamage;
+        this.effects.escape(chicken.x, WORLD.height - 36);
+        if (escapeDamage > 1) {
+          this.effects.flashText(`-${escapeDamage} ESCAPES`, chicken.x, WORLD.height - 72, "#e94742");
+        }
+        this.audio.escape();
+      }
+    }
+
+    this.items = this.items.filter((chicken) => !chicken.dead && !chicken.escaped);
+  }
+
+  hit(chicken, damage) {
+    if (chicken.dead) return;
+    chicken.hp -= damage;
+    chicken.squash = 1;
+    if (chicken.hp <= 0) {
+      this.splat(chicken, 0, "vehicle");
+    }
+  }
+
+  getType(chicken) {
+    return CHICKENS[chicken.typeId];
+  }
+
+  splat(chicken, extraDamage = 0, source = "vehicle") {
+    if (chicken.dead) return;
+    const type = CHICKENS[chicken.typeId];
+    if (type.oneTapImmune && source !== "vehicle") {
+      chicken.hp = Math.max(1, chicken.hp - Math.min(3, Math.max(1, extraDamage)));
+      chicken.squash = 1;
+      this.effects.flashText("BOSS RESISTS", chicken.x, chicken.y - 42, "#ffdf65");
+      return;
+    }
+    chicken.hp -= extraDamage;
+    chicken.dead = true;
+    const reward = source === "roadblock" ? Math.max(6, Math.round(chicken.reward * 0.65)) : chicken.reward;
+    const payout = this.economy.earnSplat(reward, this.upgrades.stats.bonusCash);
+    this.effects.splat(chicken.x, chicken.y, payout.amount, payout.combo);
+    this.audio.splat(payout.combo);
+  }
+
+  getAliveBounds(chicken) {
+    return {
+      x: chicken.x - chicken.radius,
+      y: chicken.y - chicken.radius,
+      w: chicken.radius * 2,
+      h: chicken.radius * 2
+    };
+  }
+
+  getSurfaceMultiplier(chicken) {
+    const type = CHICKENS[chicken.typeId];
+    if (type.ignoresMud || type.jumpsMud) return 1;
+
+    for (let index = 0; index < WORLD.laneCount; index += 1) {
+      const top = WORLD.roadTop + index * (WORLD.laneHeight + WORLD.laneGap);
+      if (chicken.y >= top - 4 && chicken.y <= top + WORLD.laneHeight + 4 && this.upgrades.isMudLane(index)) {
+        return this.upgrades.getMudSlowMultiplier();
+      }
+    }
+    return 1;
+  }
+
+  isMudY(y) {
+    for (let index = 0; index < WORLD.laneCount; index += 1) {
+      const top = WORLD.roadTop + index * (WORLD.laneHeight + WORLD.laneGap);
+      if (y >= top - 4 && y <= top + WORLD.laneHeight + 4) {
+        return this.upgrades.isMudLane(index);
+      }
+    }
+    return false;
+  }
+
+  checkBarbedWire(chicken) {
+    if (this.upgrades.stats.barbedWire <= 0 || chicken.dead) return;
+    const finalLaneTop = WORLD.roadTop + (WORLD.laneCount - 1) * (WORLD.laneHeight + WORLD.laneGap);
+    const type = CHICKENS[chicken.typeId];
+    if (chicken.y < finalLaneTop || chicken.y > finalLaneTop + WORLD.laneHeight) return;
+    if (chicken.hp > 1 || type.oneTapImmune) return;
+    this.upgrades.stats.barbedWire = Math.max(0, this.upgrades.stats.barbedWire - 1);
+    this.splat(chicken, 0, "wire");
+    const text = this.upgrades.stats.barbedWire > 0 ? `WIRE ${this.upgrades.stats.barbedWire} LEFT` : "WIRE BREAK";
+    this.effects.flashText(text, chicken.x, chicken.y - 36, "#e94742");
+  }
+}

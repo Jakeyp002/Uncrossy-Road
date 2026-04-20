@@ -1,0 +1,723 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #76d064;
+  color: #182321;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  min-width: 320px;
+}
+
+#app {
+  position: relative;
+  background: #84d95f;
+}
+
+#game {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  z-index: 2;
+  color: #17201f;
+  background: rgba(255, 255, 255, 0.82);
+  border: 3px solid rgba(23, 32, 31, 0.16);
+  border-radius: 8px;
+  box-shadow: 0 12px 0 rgba(29, 45, 40, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.top-left {
+  top: 10px;
+  left: 12px;
+  right: 258px;
+  width: auto;
+  min-height: 62px;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.top-right {
+  top: 12px;
+  right: 12px;
+  width: 230px;
+  padding: 5px;
+  background: rgba(117, 212, 99, 0.42);
+  border-color: rgba(23, 32, 31, 0.08);
+  box-shadow: none;
+}
+
+.bottom-right {
+  right: 16px;
+  bottom: 16px;
+  width: min(300px, calc(100vw - 32px));
+  padding: 12px 14px;
+}
+
+.break-shop {
+  left: 50%;
+  top: 84px;
+  bottom: auto;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 116px);
+  padding: 7px;
+  overflow: auto;
+  background: rgba(255, 249, 223, 0.96);
+  border: 4px solid #17201f;
+  box-shadow: 0 10px 0 rgba(23, 32, 31, 0.22), 0 0 0 3px rgba(255, 242, 107, 0.42);
+  text-align: center;
+  transform: translate(-50%, -10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.break-shop.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: -7px -7px 6px;
+  padding: 6px 8px;
+  background: #17201f;
+  color: #fff8df;
+  text-align: center;
+  border-radius: 4px 4px 0 0;
+}
+
+#interest,
+#shopTimer {
+  font-size: 14px;
+  font-weight: 950;
+}
+
+#interest {
+  display: block;
+  margin-top: 2px;
+  color: #39d96a;
+}
+
+#shopTimer {
+  min-width: 48px;
+  padding: 5px 8px;
+  text-align: center;
+  border-radius: 8px;
+  background: #fff26b;
+  color: #17201f;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.14);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-width: 208px;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0;
+  color: #e03d37;
+  text-shadow: 2px 2px 0 #fff26b;
+  margin-bottom: 0;
+}
+
+.version-tag {
+  padding: 3px 5px;
+  border-radius: 8px;
+  background: #39d9cc;
+  color: #17201f;
+  text-shadow: none;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.14);
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 0;
+}
+
+.stat-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 70px;
+  min-width: 58px;
+  min-height: 44px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: inset 0 -2px 0 rgba(23, 32, 31, 0.09);
+  font-size: 10px;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stat-row strong {
+  margin-top: 2px;
+  font-size: 16px;
+  line-height: 1;
+  text-transform: none;
+}
+
+.vehicle-buttons,
+.upgrade-buttons {
+  display: grid;
+  gap: 5px;
+}
+
+.vehicle-buttons {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.upgrade-buttons {
+  grid-template-columns: repeat(4, 116px);
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+}
+
+.shop-category {
+  grid-column: 1 / -1;
+  margin-top: 0;
+  min-height: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  color: #fff8df;
+  background: #17201f;
+  border: 2px solid #17201f;
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.shop-info {
+  min-height: 20px;
+  margin: 0 0 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(255, 242, 107, 0.7);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 850;
+}
+
+button {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 8px;
+  color: #15201e;
+  background: #fff26b;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.13), 0 3px 0 rgba(0, 0, 0, 0.14);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.13), 0 1px 0 rgba(0, 0, 0, 0.14);
+}
+
+button.selected {
+  background: #39d9cc;
+  outline: 3px solid #17201f;
+}
+
+.vehicle-button {
+  min-height: 40px;
+  display: grid;
+  grid-template-rows: 26px auto;
+  place-items: center;
+  gap: 0;
+  padding: 2px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.rarity-common {
+  border-color: #4fb8ff;
+}
+
+.rarity-uncommon {
+  border-color: #9aa3aa;
+}
+
+.rarity-rare {
+  border-color: #a66cff;
+}
+
+.rarity-epic {
+  border-color: #ffcf32;
+}
+
+.rarity-legendary {
+  border-color: #e94742;
+}
+
+.vehicle-icon {
+  position: relative;
+  width: 28px;
+  height: 18px;
+  display: block;
+  overflow: visible;
+  transform: skewX(-10deg);
+}
+
+.vehicle-icon::before,
+.vehicle-icon::after,
+.vehicle-icon span::before,
+.vehicle-icon span::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+.vehicle-icon::before {
+  left: 4px;
+  right: 4px;
+  bottom: 5px;
+  height: 9px;
+  background: #36d2d0;
+  box-shadow: inset -5px -4px 0 rgba(0, 0, 0, 0.16);
+}
+
+.vehicle-icon::after {
+  left: 8px;
+  top: 2px;
+  width: 10px;
+  height: 7px;
+  background: #eafcff;
+  box-shadow: 4px 2px 0 rgba(0, 0, 0, 0.14);
+}
+
+.vehicle-icon span::before,
+.vehicle-icon span::after {
+  bottom: 2px;
+  width: 5px;
+  height: 5px;
+  background: #17201f;
+}
+
+.vehicle-icon span::before {
+  left: 6px;
+}
+
+.vehicle-icon span::after {
+  right: 6px;
+}
+
+.vehicle-icon-truck::before {
+  background: #f56f41;
+  left: 2px;
+  right: 2px;
+}
+
+.vehicle-icon-truck::after {
+  left: 19px;
+  width: 8px;
+}
+
+.vehicle-icon-bus::before {
+  background: #ffcf32;
+  left: 0;
+  right: 0;
+}
+
+.vehicle-icon-bus::after {
+  left: 6px;
+  width: 18px;
+}
+
+.vehicle-icon-plow::before {
+  background: #dff7ff;
+  left: 0;
+  right: 6px;
+}
+
+.vehicle-icon-plow::after {
+  left: 20px;
+  top: 4px;
+  width: 7px;
+  height: 10px;
+  background: #5cb9ff;
+}
+
+.vehicle-icon-roadblock::before {
+  background: #e94742;
+  left: 0;
+  right: 0;
+}
+
+.vehicle-icon-roadblock::after {
+  left: 19px;
+  top: 3px;
+  width: 7px;
+  height: 11px;
+  background: #17201f;
+}
+
+.vehicle-button .button-main {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.vehicle-button .button-sub {
+  display: none;
+}
+
+.upgrade-tile {
+  position: relative;
+  min-height: 54px;
+  overflow: visible;
+}
+
+.upgrade-buy {
+  width: 100%;
+  min-height: 54px;
+  padding: 8px 24px 7px 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: #f6f1dc;
+  border: 2px solid #17201f;
+  box-shadow: inset 0 -5px 0 rgba(23, 32, 31, 0.12), 0 3px 0 rgba(23, 32, 31, 0.16);
+}
+
+.upgrade-icon {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  width: 48px;
+  height: 42px;
+  border: 3px solid #17201f;
+  border-radius: 8px;
+  background: #39d9cc;
+  color: #17201f;
+  font-size: 13px;
+  font-weight: 950;
+  transform: translateY(-50%) rotate(-3deg);
+  box-shadow: 0 5px 0 rgba(23, 32, 31, 0.18), inset 0 -6px 0 rgba(0, 0, 0, 0.12);
+}
+
+.upgrade-price {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 950;
+  color: #17201f;
+}
+
+.upgrade-category-economy .upgrade-icon {
+  background: #39d96a;
+}
+
+.upgrade-category-map .upgrade-icon {
+  background: #fff26b;
+}
+
+.upgrade-plowTune .upgrade-icon,
+.upgrade-truckCooldown .upgrade-icon {
+  background: #5cb9ff;
+}
+
+.upgrade-longBus .upgrade-icon {
+  background: #ffcf32;
+}
+
+.upgrade-restockWire .upgrade-icon {
+  background: #e94742;
+  color: #fff8df;
+}
+
+.info-button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 8px;
+  background: #39d9cc;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.48;
+  transform: none;
+}
+
+.button-main {
+  display: block;
+  font-size: 13px;
+  line-height: 1.05;
+}
+
+.button-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.help {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.help p {
+  margin: 0;
+}
+
+.help p + p {
+  margin-top: 6px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(20, 33, 31, 0.34);
+}
+
+.overlay.visible {
+  display: grid;
+}
+
+.modal {
+  width: min(560px, 100%);
+  padding: 26px;
+  text-align: center;
+  border-radius: 8px;
+  background: #fff9df;
+  border: 4px solid #17201f;
+  box-shadow: 0 18px 0 rgba(23, 32, 31, 0.28);
+}
+
+.chicken-dex {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.dex-card {
+  min-height: 96px;
+  padding: 10px;
+  text-align: left;
+  border-radius: 8px;
+  background: #fff26b;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.dex-card strong,
+.dex-card span {
+  display: block;
+}
+
+.dex-card strong {
+  font-size: 14px;
+}
+
+.dex-card span {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.modal h1 {
+  margin: 0;
+  font-size: 52px;
+  line-height: 0.95;
+  letter-spacing: 0;
+  color: #e03d37;
+  text-shadow: 3px 3px 0 #fff26b;
+}
+
+.tagline {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.small {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.72;
+}
+
+#startButton {
+  width: 180px;
+  min-height: 52px;
+  background: #39d96a;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#guideButton {
+  width: 180px;
+  min-height: 52px;
+  background: #39d9cc;
+}
+
+@media (max-width: 760px) {
+  .top-left {
+    top: 8px;
+    left: 8px;
+    right: 228px;
+    min-height: 58px;
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .top-right {
+    top: 8px;
+    right: 8px;
+    width: 214px;
+    padding: 5px;
+  }
+
+  .brand {
+    min-width: 112px;
+    font-size: 14px;
+  }
+
+  .stat-row {
+    min-width: 46px;
+    min-height: 40px;
+    padding: 3px 4px;
+    font-size: 9px;
+  }
+
+  .stat-row strong {
+    font-size: 12px;
+  }
+
+  .break-shop {
+    left: 50%;
+    right: auto;
+    top: 80px;
+    bottom: auto;
+    width: min(500px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+    padding: 8px;
+    transform: translate(-50%, -10px);
+  }
+
+  .break-shop.visible {
+    transform: translate(-50%, 0);
+  }
+
+  .bottom-right {
+    display: none;
+  }
+
+  .vehicle-buttons,
+  .upgrade-buttons {
+    gap: 6px;
+  }
+
+  .chicken-dex {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vehicle-buttons {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .upgrade-buttons {
+    grid-template-columns: repeat(3, 92px);
+  }
+
+  .upgrade-buy {
+    padding-left: 34px;
+  }
+
+  .upgrade-icon {
+    width: 40px;
+    height: 36px;
+    left: -8px;
+    font-size: 11px;
+  }
+
+  .upgrade-price {
+    font-size: 13px;
+  }
+
+  button {
+    min-height: 38px;
+    padding: 6px;
+  }
+
+  .button-main {
+    font-size: 11px;
+  }
+
+  .button-sub {
+    font-size: 10px;
+  }
+}

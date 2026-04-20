@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uncrossy Road</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="game" aria-label="Uncrossy Road arcade game"></canvas>
+
+      <section class="hud top-left" aria-label="Run stats">
+        <div class="brand"><span>UNCROSSY ROAD</span><span class="version-tag">v0.4</span></div>
+        <div class="stat-row">
+          <span>Cash</span>
+          <strong id="cash">$0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Escapes</span>
+          <strong id="escapes">0 / 10</strong>
+        </div>
+        <div class="stat-row">
+          <span>Combo</span>
+          <strong id="combo">x1</strong>
+        </div>
+        <div class="stat-row">
+          <span>Time</span>
+          <strong id="time">0:00</strong>
+        </div>
+        <div class="stat-row">
+          <span>Phase</span>
+          <strong id="phase">Jam</strong>
+        </div>
+      </section>
+
+      <section class="hud top-right" aria-label="Vehicle selector">
+        <div id="vehicleButtons" class="vehicle-buttons"></div>
+      </section>
+
+      <section id="shopPanel" class="hud shop break-shop" aria-label="Temporary upgrade shop">
+        <div class="shop-header">
+          <div>
+            <div class="panel-title">Shop</div>
+            <strong id="interest">Interest +$0</strong>
+          </div>
+          <span id="shopTimer">15s</span>
+        </div>
+        <div id="shopInfo" class="shop-info">Tap i for upgrade details.</div>
+        <div id="upgradeButtons" class="upgrade-buttons"></div>
+      </section>
+
+      <section class="hud bottom-right help">
+        <p>Tap a road lane to launch the selected vehicle.</p>
+        <p>1-5 switch vehicles. WASD or arrows steer row and direction. Space deploys.</p>
+      </section>
+
+      <section id="overlay" class="overlay visible" aria-live="polite">
+        <div class="modal">
+          <h1>Uncrossy Road</h1>
+          <p class="tagline">Send toy traffic into the lanes. Keep the feather rush from breaking through.</p>
+          <div id="chickenDex" class="chicken-dex" hidden></div>
+          <div class="modal-actions">
+            <button id="startButton" type="button">Start Run</button>
+            <button id="guideButton" type="button" hidden>Open Guide</button>
+          </div>
+          <p class="small">Fast runs. No saved upgrades. No mercy from poultry.</p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
