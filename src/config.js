@@ -185,6 +185,20 @@ export const CHICKENS = {
     ignoresMud: true,
     chance: 0
   },
+  doomscroller: {
+    id: "doomscroller",
+    name: "Doomscroller",
+    description: "Starts wandering in at 2:00. Faster than chickens, ignores mud, and costs you $10 if traffic hits one.",
+    hp: 1,
+    radius: 15,
+    speed: 138,
+    reward: 0,
+    penaltyOnHit: 10,
+    color: "#dfe7ff",
+    accent: "#39d9cc",
+    ignoresMud: true,
+    chance: 0
+  },
   boss: {
     id: "boss",
     name: "Boss Chicken",

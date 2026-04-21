@@ -33,6 +33,12 @@ export class Economy {
     return true;
   }
 
+  penalize(amount) {
+    const loss = Math.max(0, Math.min(this.cash, amount));
+    this.cash -= loss;
+    return loss;
+  }
+
   earnSplat(baseReward, bonusPerSplat) {
     if (this.comboTimer > 0) {
       this.combo += 1;

@@ -227,6 +227,10 @@ export class Renderer {
 
   drawChicken(ctx, chicken) {
     const type = this.game.chickenTypes[chicken.typeId];
+    if (type.id === "doomscroller") {
+      this.drawDoomscroller(ctx, chicken, type);
+      return;
+    }
     const hop = Math.abs(Math.sin(chicken.wobble * 1.7)) * 5;
     const sizeScale = chicken.radius / 15;
     const squashX = 1 + chicken.squash * 0.32;
@@ -292,6 +296,31 @@ export class Renderer {
       ctx.fillStyle = type.oneTapImmune ? "#ffdf65" : "#39d96a";
       ctx.fillRect(-20, -26, (34 * chicken.hp) / chicken.maxHp, 2);
     }
+    ctx.restore();
+  }
+
+  drawDoomscroller(ctx, chicken, type) {
+    const step = Math.abs(Math.sin(chicken.wobble * 2.4)) * 4;
+    ctx.save();
+    ctx.translate(chicken.x, chicken.y - step * 0.25);
+    ctx.scale(1 + chicken.squash * 0.18, 1 - chicken.squash * 0.14);
+
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(-13, 22, 28, 8);
+
+    this.block(ctx, -9, -18, 18, 24, 6, type.color);
+    ctx.fillStyle = "#17201f";
+    ctx.fillRect(-7, -8, 5, 22);
+    ctx.fillRect(2, -8, 5, 22);
+    ctx.fillRect(-12, 6, 5, 19);
+    ctx.fillRect(7, 6, 5, 19);
+    ctx.fillRect(-6, -30, 12, 12);
+
+    this.block(ctx, 10, -10, 10, 16, 4, "#101820");
+    ctx.fillStyle = "#39d9cc";
+    ctx.fillRect(12, -7, 4, 9);
+    ctx.fillStyle = "#ff4f8a";
+    ctx.fillRect(16, -7, 2, 9);
     ctx.restore();
   }
 
@@ -388,8 +417,17 @@ export class Renderer {
       ctx.translate(particle.x, particle.y);
       ctx.rotate(particle.spin);
       ctx.globalAlpha = Math.max(0, particle.life / 0.75);
-      ctx.fillStyle = particle.color;
-      ctx.fillRect(-particle.size * 0.5, -particle.size * 0.25, particle.size, particle.size * 0.5);
+      if (particle.shape === "phone") {
+        ctx.fillStyle = "#101820";
+        ctx.fillRect(-particle.size * 0.4, -particle.size * 0.65, particle.size * 0.8, particle.size * 1.3);
+        ctx.fillStyle = "#39d9cc";
+        ctx.fillRect(-particle.size * 0.24, -particle.size * 0.42, particle.size * 0.2, particle.size * 0.72);
+        ctx.fillStyle = "#ff4f8a";
+        ctx.fillRect(0, -particle.size * 0.42, particle.size * 0.2, particle.size * 0.72);
+      } else {
+        ctx.fillStyle = particle.color;
+        ctx.fillRect(-particle.size * 0.5, -particle.size * 0.25, particle.size, particle.size * 0.5);
+      }
       ctx.restore();
     }
 

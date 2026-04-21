@@ -102,6 +102,13 @@ export class ChickenSystem {
   splat(chicken, extraDamage = 0, source = "vehicle") {
     if (chicken.dead) return;
     const type = CHICKENS[chicken.typeId];
+    if (type.penaltyOnHit && source === "vehicle") {
+      chicken.dead = true;
+      const loss = this.economy.penalize(type.penaltyOnHit);
+      this.effects.doomscrollCrash(chicken.x, chicken.y, loss || type.penaltyOnHit);
+      this.audio.denied();
+      return;
+    }
     if (type.oneTapImmune && source !== "vehicle") {
       chicken.hp = Math.max(1, chicken.hp - Math.min(3, Math.max(1, extraDamage)));
       chicken.squash = 1;

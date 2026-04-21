@@ -69,6 +69,33 @@ export class Effects {
     }
   }
 
+  doomscrollCrash(x, y, amount) {
+    this.shake(9);
+    this.popups.push({
+      x,
+      y: y - 28,
+      text: `-$${amount}`,
+      color: COLORS.warning,
+      life: 0.95,
+      scale: 1
+    });
+
+    for (let i = 0; i < 8; i += 1) {
+      this.particles.push({
+        x: x + rand(-8, 8),
+        y: y + rand(-10, 5),
+        vx: rand(-110, 110),
+        vy: rand(-210, -80),
+        size: rand(8, 12),
+        life: rand(0.45, 0.8),
+        color: i % 2 === 0 ? "#101820" : "#39d9cc",
+        shape: i % 2 === 0 ? "phone" : "spark",
+        spin: rand(0, Math.PI * 2),
+        spinSpeed: rand(-7, 7)
+      });
+    }
+  }
+
   deploy(lane) {
     this.laneBursts.push({
       y: lane.centerY,

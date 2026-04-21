@@ -56,11 +56,13 @@ export class Spawner {
     const toughChance = Math.min(0.13, Math.max(0, difficulty - 1.8) * 0.014);
     const mudChance = runTime >= 240 ? Math.min(0.07, (runTime - 240) / 3600) : 0;
     const jumperChance = runTime >= 180 ? 0.018 : 0;
+    const doomChance = runTime >= 120 ? 1 / 15 : 0;
     const roll = Math.random();
-    if (roll < jumperChance) return "jumper";
-    if (roll < jumperChance + mudChance) return "mud";
-    if (roll < jumperChance + mudChance + toughChance) return "tough";
-    if (roll < jumperChance + mudChance + toughChance + dartChance) return "dart";
+    if (roll < doomChance) return "doomscroller";
+    if (roll < doomChance + jumperChance) return "jumper";
+    if (roll < doomChance + jumperChance + mudChance) return "mud";
+    if (roll < doomChance + jumperChance + mudChance + toughChance) return "tough";
+    if (roll < doomChance + jumperChance + mudChance + toughChance + dartChance) return "dart";
     return "runner";
   }
 }
