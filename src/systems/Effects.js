@@ -96,6 +96,50 @@ export class Effects {
     }
   }
 
+  eggSmash(x, y, brokeVehicle = false) {
+    this.shake(brokeVehicle ? 13 : 9);
+    this.popups.push({
+      x,
+      y: y - 30,
+      text: brokeVehicle ? "SPLAT!" : "SWERVE!",
+      color: brokeVehicle ? "#fff26b" : "#fff8df",
+      life: 0.85,
+      scale: 1
+    });
+
+    for (let i = 0; i < 22; i += 1) {
+      this.particles.push({
+        x: x + rand(-10, 10),
+        y: y + rand(-8, 8),
+        vx: rand(-190, 190),
+        vy: rand(-240, -40),
+        size: rand(8, 18),
+        life: rand(0.45, 1),
+        color: i % 3 === 0 ? "#fff8df" : "#f3c23b",
+        shape: i % 5 === 0 ? "shell" : "yolk",
+        spin: rand(0, Math.PI * 2),
+        spinSpeed: rand(-7, 7)
+      });
+    }
+
+    if (brokeVehicle) {
+      for (let i = 0; i < 10; i += 1) {
+        this.particles.push({
+          x: x + rand(-14, 14),
+          y: y + rand(-10, 10),
+          vx: rand(-220, 220),
+          vy: rand(-220, -60),
+          size: rand(10, 18),
+          life: rand(0.35, 0.75),
+          color: i % 2 === 0 ? "#3b434d" : "#9aa3aa",
+          shape: "shard",
+          spin: rand(0, Math.PI * 2),
+          spinSpeed: rand(-9, 9)
+        });
+      }
+    }
+  }
+
   deploy(lane) {
     this.laneBursts.push({
       y: lane.centerY,

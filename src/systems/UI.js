@@ -16,6 +16,39 @@ const UPGRADE_ICONS = {
   restockWire: "WR"
 };
 
+const TUTORIAL_CARDS = [
+  {
+    title: "Pick a lane, then fire.",
+    body: "Use 1 to 5 or click the vehicle tray to choose a ride. Move the lane picker with WASD or the arrow keys, flip direction with left or right, then hit Space to deploy instantly.",
+    tags: ["1-5 choose", "WASD / arrows move", "Space deploy", "Left / right flip"],
+    scene: "scene-controls"
+  },
+  {
+    title: "Breaks are where runs are won.",
+    body: "Every 30 seconds the road pauses for a 15 second shop break. You gain interest, get escapes back up to 5 without going over the cap, and can buy the upgrades that keep the next wave manageable.",
+    tags: ["15 second break", "interest pays out", "escapes refill up to 5", "shop before chaos"],
+    scene: "scene-shop"
+  },
+  {
+    title: "Every vehicle has a job.",
+    body: "Cars are your cheap panic answer. Trucks punch through bruisers. Buses cover a long lane. Plows sweep two lanes slowly. The Sky Eagle is a rare emergency button for four lanes at once.",
+    tags: ["Car = cheap", "Truck = reliable", "Bus = long lane", "Plow = two lanes", "Eagle = rescue"],
+    scene: "scene-vehicles"
+  },
+  {
+    title: "Know the troublemakers.",
+    body: "Darters sprint, bruisers soak hits, jumpers ignore mud, mud chickens stay fast in sludge, doomscrollers cost you cash when hit, mothers lob giant eggs, and bosses crawl in as giant disasters.",
+    tags: ["Darter", "Bruiser", "Mud chicken", "Doomscroller", "Mother hen", "Boss"],
+    scene: "scene-enemies"
+  },
+  {
+    title: "Play for flow, not panic.",
+    body: "Mud lanes are your best stalling tool. Do not spam the same road until it locks red. Save your wide vehicles for stacked lanes, and try to splat in bursts so combos keep the cash flowing.",
+    tags: ["Mud is tempo", "avoid lane lock", "save wide coverage", "combo for cash"],
+    scene: "scene-strategy"
+  }
+];
+
 export class UI {
   constructor(game) {
     this.game = game;
@@ -31,14 +64,39 @@ export class UI {
     this.shopTimer = document.querySelector("#shopTimer");
     this.shopInfo = document.querySelector("#shopInfo");
     this.overlay = document.querySelector("#overlay");
+    this.menuView = document.querySelector("#menuView");
+    this.tutorialView = document.querySelector("#tutorialView");
+    this.overlayTitle = document.querySelector("#overlayTitle");
+    this.overlayTagline = document.querySelector("#overlayTagline");
+    this.overlaySmall = document.querySelector("#overlaySmall");
+    this.resultSnapshot = document.querySelector("#resultSnapshot");
+    this.resultLabel = document.querySelector("#resultLabel");
+    this.resultHeadline = document.querySelector("#resultHeadline");
+    this.resultStats = document.querySelector("#resultStats");
     this.startButton = document.querySelector("#startButton");
     this.guideButton = document.querySelector("#guideButton");
+    this.tutorialButton = document.querySelector("#tutorialButton");
+    this.tutorialBackButton = document.querySelector("#tutorialBackButton");
+    this.tutorialPrevButton = document.querySelector("#tutorialPrevButton");
+    this.tutorialNextButton = document.querySelector("#tutorialNextButton");
+    this.tutorialStartButton = document.querySelector("#tutorialStartButton");
+    this.tutorialStep = document.querySelector("#tutorialStep");
+    this.tutorialTitle = document.querySelector("#tutorialTitle");
+    this.tutorialBody = document.querySelector("#tutorialBody");
+    this.tutorialScene = document.querySelector("#tutorialScene");
+    this.tutorialTags = document.querySelector("#tutorialTags");
     this.activeInfoUpgrade = null;
+    this.tutorialIndex = 0;
     this.renderButtons();
     this.startButton.addEventListener("click", () => this.game.startRun());
+    this.tutorialStartButton.addEventListener("click", () => this.game.startRun());
     this.guideButton.addEventListener("click", () => {
       window.location.href = "./guide.html";
     });
+    this.tutorialButton.addEventListener("click", () => this.showTutorial());
+    this.tutorialBackButton.addEventListener("click", () => this.showMenu());
+    this.tutorialPrevButton.addEventListener("click", () => this.stepTutorial(-1));
+    this.tutorialNextButton.addEventListener("click", () => this.stepTutorial(1));
   }
 
   renderButtons() {
@@ -150,30 +208,67 @@ export class UI {
 
   showStart() {
     this.overlay.classList.add("visible");
-    this.overlay.querySelector("h1").textContent = "Uncrossy Road";
-    this.overlay.querySelector(".tagline").textContent =
+    this.showMenu();
+    this.overlayTitle.textContent = "Uncrossy Road";
+    this.overlayTagline.textContent =
       "Send toy traffic into the lanes. Mud roads slow the flock. Shop breaks last 15 seconds.";
-    this.startButton.textContent = "Start Run";
-    this.guideButton.hidden = true;
-    this.overlay.querySelector(".small").textContent =
+    this.overlaySmall.textContent =
       "Fast runs. No saved upgrades. No mercy from poultry.";
+    this.startButton.textContent = "Start Run";
+    this.resultSnapshot.hidden = true;
     this.setChickenDex([]);
   }
 
   showGameOver() {
     this.overlay.classList.add("visible");
-    this.overlay.querySelector("h1").textContent = "Run Over";
-    this.overlay.querySelector(".tagline").textContent =
+    this.showMenu();
+    this.overlayTitle.textContent = "Run Over";
+    this.overlayTagline.textContent =
       `${this.game.economy.splats} splats, best combo x${this.game.economy.bestCombo}, survived ${formatTime(this.game.runTime)}.`;
     this.startButton.textContent = "Try Again";
-    this.guideButton.hidden = false;
-    this.overlay.querySelector(".small").textContent =
-      "Cash and run upgrades are gone. The next jam starts fresh.";
+    this.resultSnapshot.hidden = false;
+    this.resultLabel.textContent = "Last Run";
+    this.resultHeadline.textContent = this.game.economy.bestCombo >= 6 ? "That one nearly held." : "The road got away from you.";
+    this.resultStats.textContent = `${this.game.economy.splats} splats • $${this.game.economy.totalEarned} earned • ${formatTime(this.game.runTime)} lived`;
+    this.overlaySmall.textContent = "Cash and run upgrades are gone. Study the guide, then jump right back in.";
     this.setChickenDex(this.game.getUnlockedChickenInfo());
   }
 
   hideOverlay() {
     this.overlay.classList.remove("visible");
+  }
+
+  showMenu() {
+    this.menuView.hidden = false;
+    this.tutorialView.hidden = true;
+  }
+
+  showTutorial() {
+    this.menuView.hidden = true;
+    this.tutorialView.hidden = false;
+    this.renderTutorial();
+  }
+
+  stepTutorial(direction) {
+    const total = TUTORIAL_CARDS.length;
+    this.tutorialIndex = (this.tutorialIndex + direction + total) % total;
+    this.renderTutorial();
+  }
+
+  renderTutorial() {
+    const card = TUTORIAL_CARDS[this.tutorialIndex];
+    this.tutorialStep.textContent = `Card ${this.tutorialIndex + 1} / ${TUTORIAL_CARDS.length}`;
+    this.tutorialTitle.textContent = card.title;
+    this.tutorialBody.textContent = card.body;
+    this.tutorialScene.className = `snapshot-scene tutorial-scene ${card.scene}`;
+    this.tutorialScene.innerHTML = `
+      <div class="snapshot-road"></div>
+      <div class="snapshot-vehicle"></div>
+      <div class="snapshot-bird flock-a"></div>
+      <div class="snapshot-bird flock-b"></div>
+      <div class="snapshot-burst"></div>
+    `;
+    this.tutorialTags.innerHTML = card.tags.map((tag) => `<span class="tutorial-tag">${tag}</span>`).join("");
   }
 
   setChickenDex(chickens) {
@@ -183,7 +278,7 @@ export class UI {
     dex.innerHTML = chickens
       .map(
         (chicken) =>
-          `<article class="dex-card"><strong>${chicken.name}</strong><span>${chicken.description}</span></article>`
+          `<article class="dex-card"><div class="dex-photo dex-${chicken.id}"></div><strong>${chicken.name}</strong><span>${chicken.description}</span></article>`
       )
       .join("");
   }

@@ -216,11 +216,13 @@ export class Renderer {
   drawActors(ctx) {
     const actors = [
       ...this.game.chickens.items.map((item) => ({ kind: "chicken", item, y: item.y })),
+      ...this.game.chickens.projectiles.map((item) => ({ kind: "egg", item, y: item.y })),
       ...this.game.vehicles.items.map((item) => ({ kind: "vehicle", item, y: item.y + 18 }))
     ];
     actors.sort((a, b) => a.y - b.y);
     for (const actor of actors) {
       if (actor.kind === "chicken") this.drawChicken(ctx, actor.item);
+      if (actor.kind === "egg") this.drawEgg(ctx, actor.item);
       if (actor.kind === "vehicle") this.drawVehicle(ctx, actor.item);
     }
   }
@@ -229,6 +231,10 @@ export class Renderer {
     const type = this.game.chickenTypes[chicken.typeId];
     if (type.id === "doomscroller") {
       this.drawDoomscroller(ctx, chicken, type);
+      return;
+    }
+    if (type.id === "mother") {
+      this.drawMotherChicken(ctx, chicken, type);
       return;
     }
     const hop = Math.abs(Math.sin(chicken.wobble * 1.7)) * 5;
@@ -300,27 +306,87 @@ export class Renderer {
   }
 
   drawDoomscroller(ctx, chicken, type) {
-    const step = Math.abs(Math.sin(chicken.wobble * 2.4)) * 4;
+    const step = Math.abs(Math.sin(chicken.wobble * 1.8)) * 3;
     ctx.save();
     ctx.translate(chicken.x, chicken.y - step * 0.25);
     ctx.scale(1 + chicken.squash * 0.18, 1 - chicken.squash * 0.14);
 
     ctx.fillStyle = "rgba(0,0,0,0.18)";
-    ctx.fillRect(-13, 22, 28, 8);
+    ctx.fillRect(-14, 24, 30, 8);
 
-    this.block(ctx, -9, -18, 18, 24, 6, type.color);
+    ctx.fillStyle = "#5f3e2c";
+    ctx.fillRect(-8, -30, 16, 8);
+    this.block(ctx, -6, -26, 12, 12, 5, type.color);
+    this.block(ctx, -9, -12, 18, 27, 6, "#f7f5ff");
+
+    ctx.fillStyle = type.accent;
+    ctx.fillRect(-11, -8, 4, 18);
+    ctx.fillRect(7, -8, 4, 18);
+
+    ctx.fillStyle = "#44608b";
+    ctx.fillRect(-9, 15, 7, 12);
+    ctx.fillRect(2, 15, 7, 12);
+
     ctx.fillStyle = "#17201f";
-    ctx.fillRect(-7, -8, 5, 22);
-    ctx.fillRect(2, -8, 5, 22);
-    ctx.fillRect(-12, 6, 5, 19);
-    ctx.fillRect(7, 6, 5, 19);
-    ctx.fillRect(-6, -30, 12, 12);
+    ctx.fillRect(-7, 27, 4, 10);
+    ctx.fillRect(3, 27, 4, 10);
 
-    this.block(ctx, 10, -10, 10, 16, 4, "#101820");
+    this.block(ctx, 11, -4, 10, 16, 4, "#101820");
     ctx.fillStyle = "#39d9cc";
-    ctx.fillRect(12, -7, 4, 9);
+    ctx.fillRect(13, -1, 5, 9);
     ctx.fillStyle = "#ff4f8a";
-    ctx.fillRect(16, -7, 2, 9);
+    ctx.fillRect(18, -1, 1.5, 9);
+    ctx.restore();
+  }
+
+  drawMotherChicken(ctx, chicken, type) {
+    const hop = Math.abs(Math.sin(chicken.wobble * 1.5)) * 3;
+    const sizeScale = chicken.radius / 16;
+    ctx.save();
+    ctx.translate(chicken.x, chicken.y - hop);
+    ctx.scale(sizeScale, sizeScale);
+
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(-19, 19 + hop, 38, 8);
+    this.block(ctx, -18, -10, 36, 28, 8, type.color);
+    this.block(ctx, 8, -23, 18, 17, 6, "#d6a27a");
+    ctx.fillStyle = "#7c5837";
+    ctx.fillRect(-23, -6, 8, 9);
+    ctx.fillRect(-27, 1, 10, 7);
+    ctx.fillRect(-12, -28, 8, 8);
+    ctx.fillStyle = "#ffb13d";
+    ctx.beginPath();
+    ctx.moveTo(26, -14);
+    ctx.lineTo(38, -10);
+    ctx.lineTo(26, -6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#17201f";
+    ctx.fillRect(18, -14, 4, 4);
+    ctx.fillStyle = "#ffd45f";
+    ctx.fillRect(-8, 18, 5, 10);
+    ctx.fillRect(6, 18, 5, 10);
+    if (chicken.eggCooldown < 1.2) {
+      ctx.fillStyle = "#fff8df";
+      ctx.fillRect(24, 0, 14, 18);
+      ctx.fillStyle = "#f3c23b";
+      ctx.fillRect(28, 5, 6, 8);
+    }
+    ctx.restore();
+  }
+
+  drawEgg(ctx, projectile) {
+    ctx.save();
+    ctx.translate(projectile.x, projectile.y);
+    ctx.rotate(projectile.life * 2.2);
+    ctx.fillStyle = "rgba(0,0,0,0.16)";
+    ctx.fillRect(-18, 18, 36, 10);
+    ctx.fillStyle = "#fff8df";
+    ctx.fillRect(-14, -20, 28, 40);
+    ctx.fillStyle = "#f3c23b";
+    ctx.fillRect(-6, -8, 12, 16);
+    ctx.fillStyle = "#fff1b8";
+    ctx.fillRect(-3, -14, 6, 8);
     ctx.restore();
   }
 
@@ -341,6 +407,10 @@ export class Renderer {
   }
 
   drawToyVehicle(ctx, vehicle, config, w, h) {
+    if (vehicle.type === "roadblock") {
+      this.drawEagleVehicle(ctx, config, w, h);
+      return;
+    }
     const bodyH = h * 0.62;
     const bodyY = -bodyH * 0.5;
     const depth = Math.min(18, h * 0.28);
@@ -356,16 +426,23 @@ export class Renderer {
       for (let i = 0; i < 5; i += 1) ctx.fillRect(-w * 0.34 + i * w * 0.14, bodyY + 7, w * 0.08, bodyH * 0.28);
     } else if (vehicle.type === "plow") {
       this.isoBox(ctx, w * 0.28, bodyY - 4, w * 0.2, bodyH + 8, depth * 0.6, "#5cb9ff");
-    } else if (vehicle.type === "roadblock") {
-      ctx.fillStyle = "#17201f";
-      ctx.fillRect(w * 0.21, bodyY - 2, w * 0.18, bodyH + 4);
-      ctx.fillStyle = "#fff26b";
-      ctx.fillRect(w * 0.25, bodyY + 6, w * 0.1, bodyH * 0.22);
     }
-
     const wheelY = bodyY + bodyH + depth * 0.22;
     this.wheel(ctx, -w * 0.34, wheelY, h);
     this.wheel(ctx, w * 0.25, wheelY, h);
+  }
+
+  drawEagleVehicle(ctx, config, w, h) {
+    this.isoBox(ctx, -w * 0.09, -h * 0.18, w * 0.18, h * 0.44, 10, config.color);
+    this.isoBox(ctx, -w * 0.52, -h * 0.08, w * 0.42, h * 0.13, 8, this.shade(config.color, -4));
+    this.isoBox(ctx, w * 0.1, -h * 0.08, w * 0.42, h * 0.13, 8, this.shade(config.color, -4));
+    this.isoBox(ctx, -w * 0.08, -h * 0.36, w * 0.16, h * 0.18, 8, config.accent);
+    this.isoBox(ctx, -w * 0.07, h * 0.18, w * 0.14, h * 0.2, 8, config.accent);
+    ctx.fillStyle = "#f1c450";
+    ctx.fillRect(-w * 0.03, h * 0.35, w * 0.06, h * 0.14);
+    ctx.fillRect(w * 0.02, -h * 0.38, w * 0.05, h * 0.09);
+    ctx.fillStyle = "#17201f";
+    ctx.fillRect(w * 0.01, -h * 0.27, w * 0.03, h * 0.05);
   }
 
   wheel(ctx, x, y, h) {
@@ -424,6 +501,15 @@ export class Renderer {
         ctx.fillRect(-particle.size * 0.24, -particle.size * 0.42, particle.size * 0.2, particle.size * 0.72);
         ctx.fillStyle = "#ff4f8a";
         ctx.fillRect(0, -particle.size * 0.42, particle.size * 0.2, particle.size * 0.72);
+      } else if (particle.shape === "yolk") {
+        ctx.fillStyle = particle.color;
+        ctx.fillRect(-particle.size * 0.7, -particle.size * 0.35, particle.size * 1.4, particle.size * 0.7);
+      } else if (particle.shape === "shell") {
+        ctx.fillStyle = particle.color;
+        ctx.fillRect(-particle.size * 0.5, -particle.size * 0.55, particle.size, particle.size * 0.45);
+      } else if (particle.shape === "shard") {
+        ctx.fillStyle = particle.color;
+        ctx.fillRect(-particle.size * 0.45, -particle.size * 0.2, particle.size * 0.9, particle.size * 0.4);
       } else {
         ctx.fillStyle = particle.color;
         ctx.fillRect(-particle.size * 0.5, -particle.size * 0.25, particle.size, particle.size * 0.5);
@@ -462,13 +548,13 @@ export class Renderer {
     const lane = this.game.lanes.hoveredLane === null ? null : this.game.lanes.lanes[this.game.lanes.hoveredLane];
     if (!lane) return;
     const vehicle = VEHICLES[this.game.selectedVehicle];
-    const placement = vehicle.laneSpan === 2 ? this.game.lanes.getLanePair(lane) : lane;
+    const placement = (vehicle.laneSpan ?? 1) > 1 ? this.game.lanes.getLaneGroup(lane, vehicle.laneSpan) : lane;
     if (!placement) return;
     ctx.save();
     ctx.globalAlpha = 0.74;
     ctx.fillStyle = this.game.lanes.isPlacementLocked(placement) ? "#e94742" : vehicle.color;
     const x = placement.direction > 0 ? 22 : WORLD.width - 22;
-    const height = vehicle.laneSpan === 2 ? placement.height - 10 : 28;
+    const height = (vehicle.laneSpan ?? 1) > 1 ? placement.height - 10 : 28;
     ctx.fillRect(x - 18, placement.centerY - height * 0.5, 36, height);
     ctx.restore();
   }

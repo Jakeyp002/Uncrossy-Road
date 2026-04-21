@@ -24,7 +24,7 @@ export class Spawner {
     const interval = Math.max(0.48, 1.35 - difficulty * 0.04);
     this.timer -= dt;
     while (this.timer <= 0) {
-      chickens.spawn(this.pickChickenType(difficulty, runTime), difficulty);
+      this.spawnEntry(chickens, difficulty, runTime);
       this.timer += interval * (0.75 + Math.random() * 0.55);
     }
 
@@ -40,7 +40,7 @@ export class Spawner {
     for (const queued of this.burstQueue) {
       queued.delay -= dt;
       if (queued.delay <= 0) {
-        chickens.spawn(this.pickChickenType(queued.difficulty, runTime), queued.difficulty);
+        this.spawnEntry(chickens, queued.difficulty, runTime);
         queued.done = true;
       }
     }
@@ -56,13 +56,24 @@ export class Spawner {
     const toughChance = Math.min(0.13, Math.max(0, difficulty - 1.8) * 0.014);
     const mudChance = runTime >= 240 ? Math.min(0.07, (runTime - 240) / 3600) : 0;
     const jumperChance = runTime >= 180 ? 0.018 : 0;
-    const doomChance = runTime >= 120 ? 1 / 15 : 0;
+    const doomChance = runTime >= 120 ? 1 / 12 : 0;
+    const motherPairChance = runTime >= 180 ? 0.055 : 0;
     const roll = Math.random();
     if (roll < doomChance) return "doomscroller";
     if (roll < doomChance + jumperChance) return "jumper";
     if (roll < doomChance + jumperChance + mudChance) return "mud";
-    if (roll < doomChance + jumperChance + mudChance + toughChance) return "tough";
-    if (roll < doomChance + jumperChance + mudChance + toughChance + dartChance) return "dart";
+    if (roll < doomChance + jumperChance + mudChance + motherPairChance) return "motherPair";
+    if (roll < doomChance + jumperChance + mudChance + motherPairChance + toughChance) return "tough";
+    if (roll < doomChance + jumperChance + mudChance + motherPairChance + toughChance + dartChance) return "dart";
     return "runner";
+  }
+
+  spawnEntry(chickens, difficulty, runTime) {
+    const typeId = this.pickChickenType(difficulty, runTime);
+    if (typeId === "motherPair") {
+      chickens.spawnMotherPair(difficulty);
+      return;
+    }
+    chickens.spawn(typeId, difficulty);
   }
 }

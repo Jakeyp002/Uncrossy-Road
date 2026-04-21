@@ -92,7 +92,7 @@ export class Game {
     this.spawner.update(dt, this.runTime, this.chickens);
     this.vehicles.update(dt, this.chickens);
     this.upgrades.update(dt, this.chickens);
-    this.chickens.update(dt, this.spawner.getDifficulty(this.runTime));
+    this.chickens.update(dt, this.spawner.getDifficulty(this.runTime), this.vehicles);
 
     if (this.chickens.escaped >= this.getEscapeLimit()) {
       this.endRun();

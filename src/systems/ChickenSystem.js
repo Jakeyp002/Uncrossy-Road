@@ -1,5 +1,5 @@
 import { CHICKENS, WORLD } from "../config.js";
-import { rand } from "../utils.js";
+import { rand, rectsOverlap } from "../utils.js";
 
 export class ChickenSystem {
   constructor(economy, effects, audio, upgrades) {
@@ -12,23 +12,24 @@ export class ChickenSystem {
 
   reset() {
     this.items = [];
+    this.projectiles = [];
     this.escaped = 0;
     this.nextId = 1;
     this.seenTypes = new Set();
   }
 
-  spawn(typeId, difficulty = 0) {
+  spawn(typeId, difficulty = 0, options = {}) {
     const type = CHICKENS[typeId];
     this.seenTypes.add(typeId);
     const sidePadding = 78;
     const chicken = {
       id: this.nextId,
       typeId,
-      x: rand(sidePadding, WORLD.width - sidePadding),
-      y: -28,
+      x: options.x ?? rand(sidePadding, WORLD.width - sidePadding),
+      y: options.y ?? -28,
       baseX: 0,
-      vx: rand(-18, 18),
-      vy: type.speed + difficulty * 12 + rand(-12, 18),
+      vx: options.vx ?? rand(-18, 18),
+      vy: options.vy ?? type.speed + difficulty * 12 + rand(-12, 18),
       radius: type.radius,
       hp: type.hp,
       maxHp: type.hp,
@@ -38,21 +39,41 @@ export class ChickenSystem {
       panic: rand(0.6, 1.25),
       dead: false,
       escaped: false,
-      squash: 0
+      squash: 0,
+      eggCooldown: type.eggCooldown ?? 0
     };
     chicken.baseX = chicken.x;
     this.nextId += 1;
     this.items.push(chicken);
+    return chicken;
+  }
+
+  spawnMotherPair(difficulty = 0) {
+    const leader = this.spawn("tough", difficulty);
+    const motherSpeed = CHICKENS.mother.speed + difficulty * 10;
+    this.spawn("mother", difficulty, {
+      x: leader.x - 24,
+      y: leader.y - 52,
+      vy: motherSpeed,
+      vx: leader.vx - 5
+    });
+    this.spawn("mother", difficulty, {
+      x: leader.x + 24,
+      y: leader.y - 98,
+      vy: motherSpeed,
+      vx: leader.vx + 5
+    });
   }
 
   clearForBoss() {
-    if (this.items.length === 0) return;
+    if (this.items.length === 0 && this.projectiles.length === 0) return;
     this.items = [];
+    this.projectiles = [];
     this.effects.shake(10);
     this.effects.flashText("BOSS CLEARS ROAD", WORLD.width * 0.5, WORLD.roadTop + 28, "#ffdf65");
   }
 
-  update(dt, difficulty) {
+  update(dt, difficulty, vehicles) {
     for (const chicken of this.items) {
       if (chicken.dead) continue;
       chicken.wobble += chicken.wobbleSpeed * dt;
@@ -63,6 +84,7 @@ export class ChickenSystem {
       const type = CHICKENS[chicken.typeId];
       const speedMultiplier = type.speedMultiplier ?? 1;
       chicken.y += (chicken.vy + difficulty * 1.4) * speedMultiplier * surfaceMultiplier * dt;
+      this.updateAttacks(chicken, dt, vehicles);
       this.checkBarbedWire(chicken);
 
       if (chicken.x < 36 || chicken.x > WORLD.width - 36) {
@@ -83,7 +105,60 @@ export class ChickenSystem {
       }
     }
 
+    for (const projectile of this.projectiles) {
+      projectile.life -= dt;
+      projectile.x += projectile.vx * dt;
+      projectile.y += projectile.vy * dt;
+      projectile.vy += 220 * dt;
+
+      if (!vehicles) continue;
+      const projectileBox = {
+        x: projectile.x - projectile.radius,
+        y: projectile.y - projectile.radius,
+        w: projectile.radius * 2,
+        h: projectile.radius * 2
+      };
+      for (const vehicle of vehicles.items) {
+        if (vehicle.destroyed) continue;
+        if (!rectsOverlap(projectileBox, vehicles.getBounds(vehicle))) continue;
+        if (vehicles.handleEggHit(vehicle, projectile.x, projectile.y)) {
+          projectile.life = 0;
+          break;
+        }
+      }
+    }
+
     this.items = this.items.filter((chicken) => !chicken.dead && !chicken.escaped);
+    this.projectiles = this.projectiles.filter(
+      (projectile) =>
+        projectile.life > 0 &&
+        projectile.y < WORLD.height + 90 &&
+        projectile.x > -80 &&
+        projectile.x < WORLD.width + 80
+    );
+  }
+
+  updateAttacks(chicken, dt, vehicles) {
+    const type = CHICKENS[chicken.typeId];
+    if (type.id !== "mother" || !vehicles) return;
+    chicken.eggCooldown = Math.max(0, chicken.eggCooldown - dt);
+    if (chicken.eggCooldown > 0) return;
+
+    const target = vehicles.items.find((vehicle) => !vehicle.destroyed);
+    if (!target) return;
+    chicken.eggCooldown = WORLD.motherEggCooldown;
+    const dx = target.x - chicken.x;
+    const dy = target.y - chicken.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    this.projectiles.push({
+      x: chicken.x,
+      y: chicken.y - 8,
+      vx: (dx / distance) * 175,
+      vy: 205 + Math.max(0, dy) * 0.34,
+      radius: 18,
+      life: 4
+    });
+    this.effects.flashText("MEGA EGG!", chicken.x, chicken.y - 34, "#fff8df");
   }
 
   hit(chicken, damage) {

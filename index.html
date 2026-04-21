@@ -12,7 +12,7 @@
       <canvas id="game" aria-label="Uncrossy Road arcade game"></canvas>
 
       <section class="hud top-left" aria-label="Run stats">
-        <div class="brand"><span>UNCROSSY ROAD</span><span class="version-tag">v0.4</span></div>
+        <div class="brand"><span>UNCROSSY ROAD</span><span class="version-tag">v0.8</span></div>
         <div class="stat-row">
           <span>Cash</span>
           <strong id="cash">$0</strong>
@@ -58,14 +58,57 @@
 
       <section id="overlay" class="overlay visible" aria-live="polite">
         <div class="modal">
-          <h1>Uncrossy Road</h1>
-          <p class="tagline">Send toy traffic into the lanes. Keep the feather rush from breaking through.</p>
-          <div id="chickenDex" class="chicken-dex" hidden></div>
-          <div class="modal-actions">
-            <button id="startButton" type="button">Start Run</button>
-            <button id="guideButton" type="button" hidden>Open Guide</button>
+          <div id="menuView" class="overlay-view">
+            <h1 id="overlayTitle">Uncrossy Road</h1>
+            <p id="overlayTagline" class="tagline">Send toy traffic into the lanes. Keep the feather rush from breaking through.</p>
+            <div id="resultSnapshot" class="snapshot-card result-snapshot" hidden>
+              <div class="snapshot-photo snapshot-photo-result">
+                <div class="snapshot-scene snapshot-scene-result">
+                  <div class="snapshot-road"></div>
+                  <div class="snapshot-vehicle snapshot-vehicle-bus"></div>
+                  <div class="snapshot-bird flock-a"></div>
+                  <div class="snapshot-bird flock-b"></div>
+                  <div class="snapshot-burst"></div>
+                </div>
+              </div>
+              <div class="snapshot-caption">
+                <span id="resultLabel" class="snapshot-label">Run Snapshot</span>
+                <strong id="resultHeadline">Ready for one more try?</strong>
+                <span id="resultStats">Line up lanes, time the hits, and make the break count.</span>
+              </div>
+            </div>
+            <div id="chickenDex" class="chicken-dex" hidden></div>
+            <div class="modal-actions">
+              <button id="startButton" type="button">Start Run</button>
+              <button id="guideButton" type="button">View Guide</button>
+              <button id="tutorialButton" type="button">View Tutorial</button>
+            </div>
+            <p id="overlaySmall" class="small">Fast runs. No saved upgrades. No mercy from poultry.</p>
           </div>
-          <p class="small">Fast runs. No saved upgrades. No mercy from poultry.</p>
+
+          <div id="tutorialView" class="overlay-view tutorial-view" hidden>
+            <div class="tutorial-header">
+              <h2>Tutorial</h2>
+              <button id="tutorialBackButton" type="button">Back</button>
+            </div>
+            <div id="tutorialSnapshot" class="snapshot-card tutorial-snapshot">
+              <div class="snapshot-photo">
+                <div id="tutorialScene" class="snapshot-scene tutorial-scene scene-controls"></div>
+              </div>
+              <div class="snapshot-caption">
+                <span id="tutorialStep" class="snapshot-label">Card 1 / 5</span>
+                <strong id="tutorialTitle">Pick a lane, then fire.</strong>
+                <span id="tutorialBody">Use number keys or the selector to choose a vehicle, move the lane marker with WASD or arrows, then hit Space to deploy fast.</span>
+              </div>
+            </div>
+            <div id="tutorialTags" class="tutorial-tags"></div>
+            <div class="modal-actions tutorial-actions">
+              <button id="tutorialPrevButton" type="button">Previous</button>
+              <button id="tutorialNextButton" type="button">Next</button>
+              <button id="tutorialStartButton" type="button">Start Run</button>
+            </div>
+            <p class="small">Quick rule of thumb: buy during breaks, spread deployments across lanes, and save wide coverage for panic moments.</p>
+          </div>
         </div>
       </section>
     </main>

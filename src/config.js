@@ -16,7 +16,8 @@ export const WORLD = {
   startCash: 42,
   comboWindow: 0.85,
   playSecondsBeforeBreak: 30,
-  breakSeconds: 15
+  breakSeconds: 15,
+  motherEggCooldown: 4
 };
 
 WORLD.roadBottom = WORLD.roadTop + WORLD.laneCount * (WORLD.laneHeight + WORLD.laneGap) - WORLD.laneGap;
@@ -107,17 +108,18 @@ export const VEHICLES = {
   roadblock: {
     id: "roadblock",
     key: "5",
-    name: "Roadblock Car",
-    shortName: "Block",
+    name: "Sky Eagle",
+    shortName: "Eagle",
     cost: 50,
     cooldown: 4,
     speed: 285,
-    length: 220,
-    height: 60,
-    damage: 999,
+    length: 248,
+    height: 244,
+    damage: 1,
+    laneSpan: 4,
     maxUses: 3,
-    color: "#e94742",
-    accent: "#fff8df",
+    color: "#6f4257",
+    accent: "#f3f7ff",
     rarity: "legendary"
   }
 };
@@ -188,15 +190,29 @@ export const CHICKENS = {
   doomscroller: {
     id: "doomscroller",
     name: "Doomscroller",
-    description: "Starts wandering in at 2:00. Faster than chickens, ignores mud, and costs you $10 if traffic hits one.",
+    description: "Starts wandering in at 2:00. Slightly faster than chickens, ignores mud, and costs you $10 if traffic hits one.",
     hp: 1,
-    radius: 15,
-    speed: 138,
+    radius: 16,
+    speed: 126,
     reward: 0,
     penaltyOnHit: 10,
-    color: "#dfe7ff",
-    accent: "#39d9cc",
+    color: "#f3d0b0",
+    accent: "#d94c6a",
     ignoresMud: true,
+    chance: 0
+  },
+  mother: {
+    id: "mother",
+    name: "Mother Hen",
+    description: "Appears in pairs behind bruisers after 3:00. Brown hens that lob giant eggs every 4 seconds and can wreck cars.",
+    hp: 2,
+    radius: 17,
+    speed: 96,
+    reward: 18,
+    color: "#b88a62",
+    accent: "#7c5837",
+    ignoresMud: false,
+    eggCooldown: 4,
     chance: 0
   },
   boss: {

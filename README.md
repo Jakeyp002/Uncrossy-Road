@@ -17,7 +17,7 @@ Open `http://localhost:5173/`.
 ## Controls
 
 - Click or tap a lane to deploy the selected vehicle.
-- Press `1`, `2`, `3`, `4`, or `5` to select car, truck, bus, snow plow, or roadblock car.
+- Press `1`, `2`, `3`, `4`, or `5` to select car, truck, bus, snow plow, or sky eagle.
 - Use up/down arrows or `W/S` to choose a lane, then press `Space` to deploy.
 - Use left/right arrows or `A/D` to switch vehicle direction.
 - Buy run-shop upgrades with current cash during shop breaks.
@@ -25,10 +25,12 @@ Open `http://localhost:5173/`.
 - Mud lanes slow chickens to 25% speed, and run upgrades can make mud even stickier.
 - Every 30 seconds of action triggers a 15 second shop break.
 - Shop breaks pay 1 interest for every 5 cash you have.
-- Shop breaks restore you to at least 5 remaining escapes.
+- Shop breaks heal 5 escapes, without going past zero.
 - The final road has a barbed wire trap that pops up to three normal chickens, then can be restocked in the shop.
 - Deploying more than 5 vehicles in a row on the same lane locks that lane for 3 seconds.
-- The roadblock is now an expensive limited-use vehicle, not a shop upgrade.
+- The sky eagle is now an expensive limited-use vehicle, not a shop upgrade.
+- After 2:00, doomscrollers wander in more often, ignore mud, and cost $10 if traffic hits one.
+- After 3:00, bruisers can arrive with two mother hens behind them, and those hens fire eggs every 4 seconds that can break a small car or truck.
 - Rare later chickens include the mud-immune Mud Chicken and the 3-minute Jumper that hops over mud.
 - At 2:30, a Boss Chicken clears the road, then arrives with 20 health, mud immunity, one-tap immunity, permanent one-eighth speed, and 5 escape damage if it crosses.
 

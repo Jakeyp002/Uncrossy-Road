@@ -40,19 +40,24 @@ export class LaneManager {
   }
 
   getLanePair(lane) {
-    const pairStart = Math.floor(lane.index / 2) * 2;
-    const first = this.lanes[pairStart];
-    const second = this.lanes[pairStart + 1];
-    if (!first || !second) return null;
-    const pairIndex = pairStart / 2;
+    return this.getLaneGroup(lane, 2);
+  }
+
+  getLaneGroup(lane, span = 1) {
+    if (!lane) return null;
+    if (span <= 1) return lane;
+    const start = Math.floor(lane.index / span) * span;
+    const group = this.lanes.slice(start, start + span);
+    if (group.length !== span) return null;
+    const groupIndex = start / span;
     return {
-      index: pairStart,
-      pairIndex,
-      y: first.y,
-      centerY: (first.centerY + second.centerY) * 0.5,
-      height: second.y + second.height - first.y,
-      direction: pairIndex % 2 === 0 ? 1 : -1,
-      lanes: [first.index, second.index]
+      index: start,
+      groupIndex,
+      y: group[0].y,
+      centerY: (group[0].centerY + group[group.length - 1].centerY) * 0.5,
+      height: group[group.length - 1].y + group[group.length - 1].height - group[0].y,
+      direction: groupIndex % 2 === 0 ? 1 : -1,
+      lanes: group.map((current) => current.index)
     };
   }
 
