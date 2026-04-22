@@ -34,9 +34,9 @@ export class ChickenSystem {
     if (Math.random() >= shieldChance) return 0;
 
     const rarityRoll = Math.random();
-    if (rarityRoll < 0.58) return 1;
-    if (rarityRoll < 0.83) return 2;
-    if (rarityRoll < 0.95) return 3;
+    if (rarityRoll < 0.72) return 1;
+    if (rarityRoll < 0.94) return 2;
+    if (rarityRoll < 0.99) return 3;
     return 4;
   }
 
@@ -200,9 +200,13 @@ export class ChickenSystem {
   hit(chicken, damage, source = "vehicle", vehicle = null, vehicles = null) {
     if (chicken.dead) return;
     if (chicken.shieldTier > 0) {
+      const crackedTier = chicken.shieldTier;
       chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
       chicken.squash = 1;
       chicken.crackTimer = 0.4;
+      this.economy.cash += crackedTier;
+      this.economy.totalEarned += crackedTier;
+      this.effects.flashText(`+$${crackedTier}`, chicken.x, chicken.y - 48, "#32ca63");
       this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
       return;
     }
@@ -289,10 +293,14 @@ export class ChickenSystem {
     if (type.penaltyOnHit || type.escapeDamage === 0) return;
     if (chicken.y < finalLaneTop || chicken.y > finalLaneTop + WORLD.laneHeight) return;
     if (chicken.shieldTier > 0) {
+      const crackedTier = chicken.shieldTier;
       this.upgrades.stats.barbedWire = Math.max(0, this.upgrades.stats.barbedWire - 1);
       chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
       chicken.squash = 1;
       chicken.crackTimer = 0.4;
+      this.economy.cash += crackedTier;
+      this.economy.totalEarned += crackedTier;
+      this.effects.flashText(`+$${crackedTier}`, chicken.x, chicken.y - 48, "#32ca63");
       this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
       const text = this.upgrades.stats.barbedWire > 0 ? `WIRE ${this.upgrades.stats.barbedWire} LEFT` : "WIRE BREAK";
       this.effects.flashText(text, chicken.x, chicken.y - 36, "#e94742");
