@@ -52,6 +52,7 @@ export class Spawner {
   }
 
   pickChickenType(difficulty, runTime) {
+    const eggsplodeChance = runTime >= 30 ? 0.05 : 0;
     const dartChance = Math.min(0.18, difficulty * 0.018);
     const toughChance = Math.min(0.13, Math.max(0, difficulty - 1.8) * 0.014);
     const mudChance = runTime >= 240 ? Math.min(0.07, (runTime - 240) / 3600) : 0;
@@ -59,12 +60,13 @@ export class Spawner {
     const doomChance = runTime >= 120 ? 1 / 12 : 0;
     const motherPairChance = runTime >= 180 ? 0.055 : 0;
     const roll = Math.random();
-    if (roll < doomChance) return "doomscroller";
-    if (roll < doomChance + jumperChance) return "jumper";
-    if (roll < doomChance + jumperChance + mudChance) return "mud";
-    if (roll < doomChance + jumperChance + mudChance + motherPairChance) return "motherPair";
-    if (roll < doomChance + jumperChance + mudChance + motherPairChance + toughChance) return "tough";
-    if (roll < doomChance + jumperChance + mudChance + motherPairChance + toughChance + dartChance) return "dart";
+    if (roll < eggsplodeChance) return "eggsplode";
+    if (roll < eggsplodeChance + doomChance) return "doomscroller";
+    if (roll < eggsplodeChance + doomChance + jumperChance) return "jumper";
+    if (roll < eggsplodeChance + doomChance + jumperChance + mudChance) return "mud";
+    if (roll < eggsplodeChance + doomChance + jumperChance + mudChance + motherPairChance) return "motherPair";
+    if (roll < eggsplodeChance + doomChance + jumperChance + mudChance + motherPairChance + toughChance) return "tough";
+    if (roll < eggsplodeChance + doomChance + jumperChance + mudChance + motherPairChance + toughChance + dartChance) return "dart";
     return "runner";
   }
 

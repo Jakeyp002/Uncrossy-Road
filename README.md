@@ -12,7 +12,7 @@ Open `http://localhost:5173/`.
 
 ## Reference
 
-- [Reversy Guide](./guide.html): vehicle prices, chicken rules, cooldowns, stats, and what every run-shop upgrade does.
+- [Reversy Guide](./guide.html): vehicle unlock costs, chicken rules, cooldowns, stats, and what every run-shop upgrade does.
 
 ## Controls
 

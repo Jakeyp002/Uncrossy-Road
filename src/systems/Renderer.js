@@ -42,6 +42,250 @@ export class Renderer {
     }
   }
 
+  captureCurrentView() {
+    const photoCanvas = document.createElement("canvas");
+    photoCanvas.width = 1280;
+    photoCanvas.height = 720;
+    const ctx = photoCanvas.getContext("2d");
+    const { scale, offsetX, offsetY } = getViewTransform(photoCanvas.width, photoCanvas.height, WORLD);
+    ctx.fillStyle = COLORS.grassDark;
+    ctx.fillRect(0, 0, photoCanvas.width, photoCanvas.height);
+    ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+    this.drawGrass(ctx);
+    this.drawRoad(ctx);
+    this.drawActors(ctx);
+    this.drawEffects(ctx);
+    return photoCanvas.toDataURL("image/png");
+  }
+
+  captureTutorialShot(sceneId) {
+    const photoCanvas = document.createElement("canvas");
+    photoCanvas.width = 720;
+    photoCanvas.height = 420;
+    const ctx = photoCanvas.getContext("2d");
+    const { scale, offsetX, offsetY } = getViewTransform(photoCanvas.width, photoCanvas.height, WORLD);
+    const scene = this.buildTutorialScene(sceneId);
+    const game = this.game;
+    const originalState = {
+      mode: game.mode,
+      hoveredLane: game.lanes.hoveredLane,
+      selectedVehicle: game.selectedVehicle,
+      vehicleDirection: game.vehicleDirection,
+      chickenItems: game.chickens.items,
+      projectiles: game.chickens.projectiles,
+      vehicleItems: game.vehicles.items,
+      particles: game.effects.particles,
+      popups: game.effects.popups,
+      laneBursts: game.effects.laneBursts
+    };
+
+    try {
+      game.mode = "playing";
+      game.lanes.hoveredLane = scene.hoveredLane ?? null;
+      game.selectedVehicle = scene.selectedVehicle ?? game.selectedVehicle;
+      game.vehicleDirection = scene.vehicleDirection ?? 1;
+      game.chickens.items = scene.chickens;
+      game.chickens.projectiles = scene.projectiles ?? [];
+      game.vehicles.items = scene.vehicles;
+      game.effects.particles = [];
+      game.effects.popups = [];
+      game.effects.laneBursts = [];
+
+      ctx.fillStyle = COLORS.grassDark;
+      ctx.fillRect(0, 0, photoCanvas.width, photoCanvas.height);
+      ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+      this.drawGrass(ctx);
+      this.drawRoad(ctx);
+      this.drawActors(ctx);
+      if (scene.showAim) {
+        this.drawAimHint(ctx);
+      }
+    } finally {
+      game.mode = originalState.mode;
+      game.lanes.hoveredLane = originalState.hoveredLane;
+      game.selectedVehicle = originalState.selectedVehicle;
+      game.vehicleDirection = originalState.vehicleDirection;
+      game.chickens.items = originalState.chickenItems;
+      game.chickens.projectiles = originalState.projectiles;
+      game.vehicles.items = originalState.vehicleItems;
+      game.effects.particles = originalState.particles;
+      game.effects.popups = originalState.popups;
+      game.effects.laneBursts = originalState.laneBursts;
+    }
+
+    return photoCanvas.toDataURL("image/png");
+  }
+
+  captureGameOverShot() {
+    return this.captureTutorialShot("scene-gameover");
+  }
+
+  captureChickenPortrait(typeId) {
+    const portraitCanvas = document.createElement("canvas");
+    portraitCanvas.width = 280;
+    portraitCanvas.height = 180;
+    const ctx = portraitCanvas.getContext("2d");
+    const chickenType = this.game.chickenTypes[typeId];
+    const chicken = {
+      id: `portrait-${typeId}`,
+      typeId,
+      x: 142,
+      y: 104,
+      radius: chickenType.radius,
+      wobble: 0.65,
+      wobbleSpeed: 8,
+      squash: 0,
+      maxHp: chickenType.hp,
+      hp: chickenType.hp,
+      reward: chickenType.reward,
+      shieldTier: typeId === "boss" ? 0 : typeId === "mud" ? 2 : 0,
+      eggCooldown: 0,
+      crackTimer: 0,
+      dead: false,
+      escaped: false
+    };
+
+    ctx.fillStyle = COLORS.grass;
+    ctx.fillRect(0, 0, portraitCanvas.width, portraitCanvas.height);
+    ctx.fillStyle = typeId === "doomscroller" ? COLORS.roadLight : COLORS.road;
+    ctx.fillRect(0, 104, portraitCanvas.width, 76);
+    ctx.fillStyle = "rgba(255,255,255,0.16)";
+    ctx.fillRect(22, 128, portraitCanvas.width - 44, 8);
+    ctx.fillRect(42, 146, portraitCanvas.width - 84, 6);
+
+    ctx.save();
+    if (typeId === "doomscroller") {
+      this.drawDoomscroller(ctx, chicken, chickenType);
+    } else if (typeId === "mother") {
+      this.drawMotherChicken(ctx, chicken, chickenType);
+    } else {
+      this.drawChicken(ctx, chicken);
+    }
+    ctx.restore();
+
+    return portraitCanvas.toDataURL("image/png");
+  }
+
+  buildTutorialScene(sceneId) {
+    const laneY = (index) => this.game.lanes.lanes[index]?.centerY ?? 0;
+    const chicken = (typeId, x, laneIndex, extra = {}) => ({
+      id: `shot-${sceneId}-${typeId}-${x}-${laneIndex}`,
+      typeId,
+      x,
+      y: laneY(laneIndex),
+      radius: this.game.chickenTypes[typeId].radius,
+      wobble: extra.wobble ?? 0.8,
+      wobbleSpeed: 8,
+      squash: 0,
+      maxHp: extra.maxHp ?? this.game.chickenTypes[typeId].hp,
+      hp: extra.hp ?? this.game.chickenTypes[typeId].hp,
+      reward: this.game.chickenTypes[typeId].reward,
+      shieldTier: extra.shieldTier ?? 0,
+      crackTimer: extra.crackTimer ?? 0,
+      dead: false,
+      escaped: false,
+      eggCooldown: extra.eggCooldown ?? 0
+    });
+    const vehicle = (type, x, laneIndex, extra = {}) => ({
+      id: `shot-${sceneId}-${type}-${x}-${laneIndex}`,
+      type,
+      x,
+      y: extra.y ?? laneY(laneIndex),
+      direction: extra.direction ?? 1,
+      laneIndex,
+      laneSpan: extra.laneSpan ?? (VEHICLES[type].laneSpan ?? 1),
+      length: extra.length ?? VEHICLES[type].length,
+      height: extra.height ?? VEHICLES[type].height,
+      damage: VEHICLES[type].damage,
+      bob: extra.bob ?? 0.45,
+      destroyed: false,
+      swerveTimer: 0,
+      swerveDuration: 0.28,
+      swerveFromY: extra.y ?? laneY(laneIndex),
+      swerveToY: extra.y ?? laneY(laneIndex),
+      hitIds: new Set()
+    });
+    const egg = (x, y, vx = 0, vy = 0) => ({ x, y, vx, vy, radius: 18, life: 3 });
+
+    const scenes = {
+      "scene-controls": {
+        hoveredLane: 3,
+        selectedVehicle: "truck",
+        vehicleDirection: 1,
+        showAim: true,
+        vehicles: [vehicle("truck", 370, 3)],
+        chickens: [chicken("runner", 790, 3), chicken("dart", 950, 1)]
+      },
+      "scene-shop": {
+        hoveredLane: null,
+        selectedVehicle: "car",
+        vehicleDirection: -1,
+        vehicles: [vehicle("car", 280, 2), vehicle("bus", 910, 5, { direction: -1 })],
+        chickens: [chicken("runner", 790, 2), chicken("tough", 560, 5, { hp: 2, maxHp: 2 })]
+      },
+      "scene-vehicles": {
+        hoveredLane: null,
+        selectedVehicle: "roadblock",
+        vehicleDirection: 1,
+        vehicles: [
+          vehicle("car", 180, 1),
+          vehicle("truck", 350, 2),
+          vehicle("bus", 560, 3),
+          vehicle("plow", 820, 5, { height: this.game.lanes.getLaneGroup(this.game.lanes.lanes[4], 2).height - 6, y: this.game.lanes.getLaneGroup(this.game.lanes.lanes[4], 2).centerY, laneIndex: 4, laneSpan: 2 }),
+          vehicle("roadblock", 1080, 4, { height: VEHICLES.roadblock.height, y: this.game.lanes.getLaneGroup(this.game.lanes.lanes[4], 4).centerY, laneIndex: 4, laneSpan: 4 })
+        ],
+        chickens: []
+      },
+      "scene-enemies": {
+        hoveredLane: null,
+        selectedVehicle: "bus",
+        vehicleDirection: 1,
+        vehicles: [vehicle("bus", 260, 6)],
+        chickens: [
+          chicken("runner", 780, 1, { shieldTier: 1 }),
+          chicken("eggsplode", 835, 2),
+          chicken("mud", 910, 2, { shieldTier: 2 }),
+          chicken("doomscroller", 680, 3),
+          chicken("mother", 870, 4, { shieldTier: 3, hp: 2, maxHp: 2 }),
+          chicken("boss", 1040, 6, { hp: 20, maxHp: 20 })
+        ],
+        projectiles: [egg(760, laneY(4) - 50)]
+      },
+      "scene-strategy": {
+        hoveredLane: 5,
+        selectedVehicle: "plow",
+        vehicleDirection: -1,
+        showAim: true,
+        vehicles: [vehicle("plow", 890, 4, { direction: -1, height: this.game.lanes.getLaneGroup(this.game.lanes.lanes[4], 2).height - 6, y: this.game.lanes.getLaneGroup(this.game.lanes.lanes[4], 2).centerY, laneIndex: 4, laneSpan: 2 })],
+        chickens: [
+          chicken("runner", 710, 2, { shieldTier: 1 }),
+          chicken("tough", 830, 4, { hp: 2, maxHp: 2 }),
+          chicken("jumper", 960, 5),
+          chicken("mud", 1030, 5, { shieldTier: 2 })
+        ]
+      },
+      "scene-gameover": {
+        hoveredLane: null,
+        selectedVehicle: "bus",
+        vehicleDirection: 1,
+        vehicles: [
+          vehicle("bus", 300, 4),
+          vehicle("car", 620, 2),
+          vehicle("truck", 900, 5, { direction: -1 })
+        ],
+        chickens: [
+          chicken("runner", 470, 4, { shieldTier: 1 }),
+          chicken("tough", 690, 3, { hp: 2, maxHp: 2 }),
+          chicken("mother", 1040, 5, { hp: 2, maxHp: 2 }),
+          chicken("doomscroller", 820, 1)
+        ],
+        projectiles: [egg(965, laneY(5) - 52)]
+      }
+    };
+
+    return scenes[sceneId] ?? scenes["scene-controls"];
+  }
+
   drawGrass(ctx) {
     ctx.fillStyle = COLORS.grass;
     ctx.fillRect(0, 0, WORLD.width, WORLD.height);
@@ -247,23 +491,19 @@ export class Renderer {
 
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillRect(-17, 18 + hop, 34, 9);
+    const palette = this.getChickenPalette(type, chicken);
+    this.block(ctx, -17, -14, 34, 31, 8, palette.body);
+    this.block(ctx, 9, -28, 22, 21, 7, palette.head);
 
-    if (chicken.shieldTier > 0) {
-      const shieldColors = ["#39d96a", "#4fb8ff", "#a66cff", "#e94742"];
-      const shieldColor = shieldColors[chicken.shieldTier - 1];
-      ctx.globalAlpha = 0.22;
-      ctx.fillStyle = shieldColor;
-      ctx.fillRect(-28, -28, 58, 58);
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = shieldColor;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(-24, -24, 50, 50);
-      ctx.lineWidth = 2;
-      ctx.strokeRect(-29, -29, 60, 60);
+    if (type.explodeOnDeath) {
+      ctx.fillStyle = "#fff8df";
+      ctx.fillRect(-28, -22, 12, 16);
+      ctx.fillStyle = "#f3c23b";
+      ctx.fillRect(-24, -16, 4, 7);
+      ctx.fillStyle = "#ff8b3d";
+      ctx.fillRect(-30, -26, 5, 4);
+      ctx.fillRect(-19, -27, 5, 4);
     }
-
-    this.block(ctx, -17, -14, 34, 31, 8, type.color);
-    this.block(ctx, 9, -28, 22, 21, 7, type.color);
 
     if (type.jumpsMud) {
       ctx.fillStyle = "#5cb9ff";
@@ -289,7 +529,7 @@ export class Renderer {
       ctx.fillRect(-9, -36, 34, 5);
     }
 
-    ctx.fillStyle = type.accent;
+    ctx.fillStyle = palette.accent;
     ctx.fillRect(14, -38, 9, 8);
     ctx.fillRect(22, -35, 7, 7);
 
@@ -316,6 +556,7 @@ export class Renderer {
       ctx.fillStyle = type.oneTapImmune ? "#ffdf65" : "#39d96a";
       ctx.fillRect(-20, -26, (34 * chicken.hp) / chicken.maxHp, 2);
     }
+    this.drawChickenCracks(ctx, chicken);
     ctx.restore();
   }
 
@@ -359,11 +600,12 @@ export class Renderer {
     ctx.save();
     ctx.translate(chicken.x, chicken.y - hop);
     ctx.scale(sizeScale, sizeScale);
+    const palette = this.getChickenPalette(type, chicken);
 
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillRect(-19, 19 + hop, 38, 8);
-    this.block(ctx, -18, -10, 36, 28, 8, type.color);
-    this.block(ctx, 8, -23, 18, 17, 6, "#d6a27a");
+    this.block(ctx, -18, -10, 36, 28, 8, palette.body);
+    this.block(ctx, 8, -23, 18, 17, 6, palette.head);
     ctx.fillStyle = "#7c5837";
     ctx.fillRect(-23, -6, 8, 9);
     ctx.fillRect(-27, 1, 10, 7);
@@ -386,6 +628,7 @@ export class Renderer {
       ctx.fillStyle = "#f3c23b";
       ctx.fillRect(28, 5, 6, 8);
     }
+    this.drawChickenCracks(ctx, chicken, 0.9);
     ctx.restore();
   }
 
@@ -413,7 +656,11 @@ export class Renderer {
 
     ctx.save();
     ctx.translate(vehicle.x, vehicle.y + bounce);
-    ctx.scale(dir, 1);
+    if (vehicle.type === "roadblock") {
+      ctx.rotate((Math.PI / 2) * dir);
+    } else {
+      ctx.scale(dir, 1);
+    }
     ctx.fillStyle = "rgba(0,0,0,0.22)";
     ctx.fillRect(-w * 0.48, h * 0.34, w * 0.96, 12);
     this.drawToyVehicle(ctx, vehicle, config, w, h);
@@ -524,10 +771,15 @@ export class Renderer {
       } else if (particle.shape === "shard") {
         ctx.fillStyle = particle.color;
         ctx.fillRect(-particle.size * 0.45, -particle.size * 0.2, particle.size * 0.9, particle.size * 0.4);
-      } else if (particle.shape === "shield") {
+      } else if (particle.shape === "crack") {
         ctx.strokeStyle = particle.color;
-        ctx.lineWidth = Math.max(2, particle.size * 0.18);
-        ctx.strokeRect(-particle.size * 0.45, -particle.size * 0.45, particle.size * 0.9, particle.size * 0.9);
+        ctx.lineWidth = Math.max(2, particle.size * 0.16);
+        ctx.beginPath();
+        ctx.moveTo(-particle.size * 0.35, -particle.size * 0.4);
+        ctx.lineTo(0, -particle.size * 0.08);
+        ctx.lineTo(-particle.size * 0.12, particle.size * 0.1);
+        ctx.lineTo(particle.size * 0.3, particle.size * 0.42);
+        ctx.stroke();
       } else {
         ctx.fillStyle = particle.color;
         ctx.fillRect(-particle.size * 0.5, -particle.size * 0.25, particle.size, particle.size * 0.5);
@@ -625,5 +877,36 @@ export class Renderer {
     const g = Math.max(0, Math.min(255, ((n >> 8) & 255) + amount));
     const b = Math.max(0, Math.min(255, (n & 255) + amount));
     return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  getChickenPalette(type, chicken) {
+    if (!chicken.shieldTier) {
+      return { body: type.color, head: type.color, accent: type.accent };
+    }
+    const tiers = [
+      { body: "#39d96a", head: "#7ef1a2", accent: "#166534" },
+      { body: "#4fb8ff", head: "#9ddcff", accent: "#1d4ed8" },
+      { body: "#a66cff", head: "#d5b5ff", accent: "#6d28d9" },
+      { body: "#e94742", head: "#ff9a96", accent: "#7f1d1d" }
+    ];
+    return tiers[chicken.shieldTier - 1] ?? { body: type.color, head: type.color, accent: type.accent };
+  }
+
+  drawChickenCracks(ctx, chicken, scale = 1) {
+    if (!chicken.crackTimer || chicken.crackTimer <= 0) return;
+    const alpha = Math.min(1, chicken.crackTimer / 0.4);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = "#fff8df";
+    ctx.lineWidth = 2.5 * scale;
+    ctx.beginPath();
+    ctx.moveTo(-6 * scale, -20 * scale);
+    ctx.lineTo(1 * scale, -8 * scale);
+    ctx.lineTo(-3 * scale, 0);
+    ctx.moveTo(4 * scale, -16 * scale);
+    ctx.lineTo(10 * scale, -6 * scale);
+    ctx.lineTo(6 * scale, 6 * scale);
+    ctx.stroke();
+    ctx.restore();
   }
 }

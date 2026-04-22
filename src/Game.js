@@ -25,6 +25,7 @@ export class Game {
     this.selectedLaneIndex = 0;
     this.vehicleDirection = 1;
     this.rescueTimer = 0;
+    this.gameOverSnapshot = null;
 
     this.audio = new AudioSystem();
     this.effects = new Effects();
@@ -52,6 +53,7 @@ export class Game {
     this.nextBreakAt = WORLD.playSecondsBeforeBreak;
     this.selectedVehicle = "car";
     this.rescueTimer = 0;
+    this.gameOverSnapshot = null;
     this.effects.reset();
     this.economy.reset();
     this.upgrades.reset();
@@ -122,6 +124,7 @@ export class Game {
   }
 
   selectVehicle(type) {
+    if (!this.upgrades.isVehicleUnlocked(type)) return;
     this.selectedVehicle = type;
   }
 
@@ -151,6 +154,7 @@ export class Game {
   }
 
   endRun() {
+    this.gameOverSnapshot = this.renderer.captureCurrentView();
     this.mode = "gameover";
     this.audio.gameOver();
     this.effects.shake(18);

@@ -34,6 +34,7 @@ export class VehicleSystem {
 
       const vehicleBox = this.getBounds(vehicle);
       for (const chicken of chickens.items) {
+        if (vehicle.destroyed) break;
         if (chicken.dead || vehicle.hitIds.has(chicken.id)) continue;
         if (rectsOverlap(vehicleBox, chickens.getAliveBounds(chicken))) {
           vehicle.hitIds.add(chicken.id);
@@ -42,7 +43,7 @@ export class VehicleSystem {
             chickenType.oneTapImmune && vehicle.damage >= chicken.maxHp
               ? Math.max(1, Math.floor(chicken.maxHp * 0.2))
               : vehicle.damage;
-          chickens.hit(chicken, damage);
+          chickens.hit(chicken, damage, "vehicle", vehicle, this);
         }
       }
     }
@@ -57,6 +58,7 @@ export class VehicleSystem {
   canDeploy(type) {
     const config = VEHICLES[type];
     return (
+      this.upgrades.isVehicleUnlocked(type) &&
       this.cooldowns[type] <= 0 &&
       (!config.maxUses || this.uses[type] < config.maxUses) &&
       this.economy.canAfford(this.upgrades.getVehicleCost(type))
@@ -65,6 +67,11 @@ export class VehicleSystem {
 
   deploy(type, lane, directionOverride = null) {
     const config = VEHICLES[type];
+    if (!this.upgrades.isVehicleUnlocked(type)) {
+      this.audio.denied();
+      this.effects.flashText(`Unlock ${config.shortName}`, 640, 88, "#e94742");
+      return false;
+    }
     const placement = (config.laneSpan ?? 1) > 1 ? this.lanes.getLaneGroup(lane, config.laneSpan) : lane;
     if (!placement) {
       this.audio.denied();
@@ -140,6 +147,17 @@ export class VehicleSystem {
     if (vehicle.type !== "car" && vehicle.type !== "truck") return false;
     vehicle.destroyed = true;
     this.effects.eggSmash(x, y, true);
+    this.audio.denied();
+    return true;
+  }
+
+  destroyVehicle(vehicle, x, y, reason = "explode") {
+    if (!vehicle || vehicle.destroyed) return false;
+    vehicle.destroyed = true;
+    this.effects.eggSmash(x, y, true);
+    if (reason === "explode") {
+      this.effects.flashText("BOOM!", x, y - 40, "#ff8b3d");
+    }
     this.audio.denied();
     return true;
   }

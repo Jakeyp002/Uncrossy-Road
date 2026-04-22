@@ -282,6 +282,15 @@ button.selected {
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
 }
 
+.vehicle-button.locked {
+  background: rgba(23, 32, 31, 0.14);
+  border-style: dashed;
+}
+
+.vehicle-button.locked .vehicle-icon {
+  opacity: 0.48;
+}
+
 .vehicle-timer {
   position: absolute;
   inset: 3px;
@@ -578,14 +587,69 @@ button:disabled {
   display: grid;
 }
 
+.gameover-splash {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(20, 33, 31, 0.58);
+}
+
+.splash-card {
+  position: relative;
+  width: min(96vw, 1060px);
+  height: min(88vh, 760px);
+  border: 4px solid #17201f;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fffef7;
+  box-shadow: 0 24px 0 rgba(23, 32, 31, 0.28);
+  transform: rotate(5deg);
+  cursor: pointer;
+}
+
+.splash-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: #7bd66f;
+}
+
+.splash-caption {
+  position: absolute;
+  left: 20px;
+  bottom: 18px;
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(23, 32, 31, 0.84);
+  color: #fff8df;
+}
+
+.splash-caption span {
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.splash-caption strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
 .modal {
   width: min(760px, 100%);
-  padding: 18px 18px 20px;
+  max-height: min(92vh, 760px);
+  padding: 16px 16px 18px;
   text-align: center;
   border-radius: 8px;
   background: #fff9df;
   border: 4px solid #17201f;
   box-shadow: 0 18px 0 rgba(23, 32, 31, 0.28);
+  overflow: hidden;
 }
 
 .overlay-view[hidden] {
@@ -602,14 +666,14 @@ button:disabled {
 
 .chicken-dex {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 14px 0 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
 }
 
 .dex-card {
-  min-height: 148px;
-  padding: 10px;
+  min-height: 116px;
+  padding: 8px;
   text-align: left;
   border-radius: 8px;
   background: #fff7d0;
@@ -617,102 +681,16 @@ button:disabled {
   box-shadow: 0 7px 0 rgba(0, 0, 0, 0.12);
 }
 
-.dex-photo {
-  position: relative;
-  height: 74px;
-  margin-bottom: 8px;
+.dex-photo-img {
+  display: block;
+  width: 100%;
+  height: 52px;
+  margin-bottom: 6px;
   border: 3px solid #17201f;
   border-radius: 8px;
-  background: linear-gradient(180deg, #7fdc74 0%, #7fdc74 52%, #727f88 52%, #727f88 100%);
-  overflow: hidden;
-}
-
-.dex-photo::before,
-.dex-photo::after {
-  content: "";
-  position: absolute;
-}
-
-.dex-photo::before {
-  left: 10px;
-  right: 10px;
-  bottom: 16px;
-  height: 10px;
-  background: rgba(255, 235, 114, 0.82);
-}
-
-.dex-photo::after {
-  width: 22px;
-  height: 22px;
-  right: 18px;
-  top: 24px;
-  border-radius: 8px 8px 10px 10px;
-  background: #fff7da;
-  box-shadow:
-    inset -4px -4px 0 rgba(0, 0, 0, 0.1),
-    -14px -8px 0 -6px #e94742,
-    -18px 4px 0 -8px #e6aa4f;
-}
-
-.dex-dart::after {
-  background: #f4fff6;
-  box-shadow:
-    inset -4px -4px 0 rgba(0, 0, 0, 0.1),
-    -14px -8px 0 -6px #39d96a,
-    -18px 4px 0 -8px #5cb9ff;
-}
-
-.dex-tough::after {
-  width: 28px;
-  height: 26px;
-  background: #ffe19a;
-}
-
-.dex-jumper::after {
-  top: 16px;
-  background: #dff7ff;
-}
-
-.dex-mud::after {
-  background: #c3aa67;
-}
-
-.dex-doomscroller {
-  background: linear-gradient(180deg, #7fdc74 0%, #7fdc74 52%, #8c959d 52%, #8c959d 100%);
-}
-
-.dex-doomscroller::after {
-  width: 16px;
-  height: 32px;
-  right: 22px;
-  top: 18px;
-  border-radius: 6px;
-  background: #f3d0b0;
-  box-shadow:
-    inset 0 -10px 0 #d94c6a,
-    -12px 14px 0 -7px #2f4e78,
-    10px 14px 0 -7px #2f4e78,
-    -6px -8px 0 -7px #6a4630;
-}
-
-.dex-mother::after {
-  background: #b88a62;
-  box-shadow:
-    inset -4px -4px 0 rgba(0, 0, 0, 0.1),
-    -14px -8px 0 -6px #7c5837,
-    -18px 4px 0 -8px #e6aa4f;
-}
-
-.dex-boss::after {
-  width: 34px;
-  height: 34px;
-  right: 12px;
-  top: 18px;
-  background: #ffdf65;
-  box-shadow:
-    inset -5px -5px 0 rgba(0, 0, 0, 0.12),
-    -18px -10px 0 -7px #e94742,
-    -24px 5px 0 -9px #e6aa4f;
+  object-fit: cover;
+  background: #7fdc74;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.12);
 }
 
 .dex-card strong,
@@ -721,13 +699,14 @@ button:disabled {
 }
 
 .dex-card strong {
-  font-size: 14px;
+  font-size: 12px;
+  line-height: 1.05;
 }
 
 .dex-card span {
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.25;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.15;
   font-weight: 800;
 }
 
@@ -763,7 +742,7 @@ button:disabled {
 }
 
 .snapshot-card {
-  margin: 16px auto 10px;
+  margin: 12px auto 10px;
   width: min(100%, 430px);
   padding: 12px 12px 16px;
   border-radius: 8px;
@@ -774,12 +753,8 @@ button:disabled {
 }
 
 .tutorial-snapshot {
-  width: min(100%, 470px);
+  width: min(100%, 430px);
   margin: 0 auto;
-}
-
-.result-snapshot {
-  transform: rotate(1.2deg);
 }
 
 .snapshot-photo {
@@ -788,6 +763,14 @@ button:disabled {
   border-radius: 8px;
   border: 3px solid #17201f;
   overflow: hidden;
+  background: #7bd66f;
+}
+
+.snapshot-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
   background: #7bd66f;
 }
 
@@ -1154,6 +1137,7 @@ button:disabled {
 #tutorialPrevButton,
 #tutorialNextButton,
 #tutorialStartButton {
+  width: 180px;
   min-height: 52px;
 }
 
@@ -1257,6 +1241,16 @@ button:disabled {
   .tutorial-header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .splash-card {
+    width: min(96vw, 640px);
+    height: min(76vh, 520px);
+    transform: rotate(3deg);
+  }
+
+  .splash-caption strong {
+    font-size: 22px;
   }
 
   .vehicle-buttons {

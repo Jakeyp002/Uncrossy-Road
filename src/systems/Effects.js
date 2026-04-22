@@ -140,14 +140,41 @@ export class Effects {
     }
   }
 
+  bombBurst(x, y) {
+    this.shake(14);
+    this.popups.push({
+      x,
+      y: y - 24,
+      text: "EGGSPLODE!",
+      color: "#ff8b3d",
+      life: 0.8,
+      scale: 1
+    });
+
+    for (let i = 0; i < 26; i += 1) {
+      this.particles.push({
+        x: x + rand(-12, 12),
+        y: y + rand(-12, 12),
+        vx: rand(-240, 240),
+        vy: rand(-250, -30),
+        size: rand(7, 15),
+        life: rand(0.35, 0.9),
+        color: i % 3 === 0 ? "#ff8b3d" : i % 2 === 0 ? "#fff8df" : "#f3c23b",
+        shape: i % 4 === 0 ? "shell" : "yolk",
+        spin: rand(0, Math.PI * 2),
+        spinSpeed: rand(-9, 9)
+      });
+    }
+  }
+
   shieldBreak(x, y, remainingTier) {
-    const palette = ["#fff8df", "#39d96a", "#4fb8ff", "#a66cff", "#e94742"];
+    const palette = ["#fff7da", "#39d96a", "#4fb8ff", "#a66cff", "#e94742"];
     const color = palette[Math.max(0, Math.min(palette.length - 1, remainingTier + 1))];
     this.shake(remainingTier === 0 ? 9 : 6);
     this.popups.push({
       x,
       y: y - 26,
-      text: remainingTier > 0 ? "SHIELD DOWN" : "SHIELD POP",
+      text: remainingTier > 0 ? "CRACK!" : "POP!",
       color,
       life: 0.75,
       scale: 1
@@ -162,7 +189,7 @@ export class Effects {
         size: rand(4, 10),
         life: rand(0.35, 0.7),
         color,
-        shape: "shield",
+        shape: "crack",
         spin: rand(0, Math.PI * 2),
         spinSpeed: rand(-8, 8)
       });

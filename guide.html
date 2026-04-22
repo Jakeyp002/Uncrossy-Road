@@ -188,47 +188,47 @@
               <td data-label="Speed">690</td>
               <td data-label="Damage">1</td>
               <td data-label="Coverage">Narrow, one lane</td>
-              <td data-label="Best Use">Cheap reaction shots when money is tight.</td>
+              <td data-label="Best Use">Starts unlocked. Cheap reaction shots when money is tight.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Truck</td>
               <td data-label="Hotkey"><span class="pill">2</span></td>
-              <td data-label="Cost">$10</td>
+              <td data-label="Cost">$10 after buying Unlock Truck for $45</td>
               <td data-label="Cooldown">0.78 seconds, lowered by Truck Rush</td>
               <td data-label="Speed">475</td>
-              <td data-label="Damage">2</td>
+              <td data-label="Damage">4</td>
               <td data-label="Coverage">Wider, one lane</td>
-              <td data-label="Best Use">Reliable hits against tougher chickens.</td>
+              <td data-label="Best Use">Heavy single-lane hitter once unlocked from the Vehicles shelf.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Bus</td>
               <td data-label="Hotkey"><span class="pill">3</span></td>
-              <td data-label="Cost">$15</td>
+              <td data-label="Cost">$15 after buying Unlock Bus for $68</td>
               <td data-label="Cooldown">1.35 seconds</td>
               <td data-label="Speed">365</td>
               <td data-label="Damage">3</td>
               <td data-label="Coverage">Long one-lane sweep, extended by Long Bus</td>
-              <td data-label="Best Use">Clearing a busy lane or lining up combo splats.</td>
+              <td data-label="Best Use">Unlock it mid-run to start clearing long crowded lanes.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Snow Plow</td>
               <td data-label="Hotkey"><span class="pill">4</span></td>
-              <td data-label="Cost">$20</td>
+              <td data-label="Cost">$20 after buying Unlock Plow for $90</td>
               <td data-label="Cooldown">2.4 seconds, lowered by Plow Tune</td>
               <td data-label="Speed">235</td>
               <td data-label="Damage">3</td>
               <td data-label="Coverage">Slow sweep across two paired lanes</td>
-              <td data-label="Best Use">Two-lane pressure relief when chickens stack up.</td>
+              <td data-label="Best Use">Two-lane pressure relief once you can afford the unlock.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Sky Eagle</td>
               <td data-label="Hotkey"><span class="pill">5</span></td>
-              <td data-label="Cost">$50</td>
+              <td data-label="Cost">$50 after buying Unlock Eagle for $225</td>
               <td data-label="Cooldown">4 seconds</td>
               <td data-label="Speed">285</td>
               <td data-label="Damage">1</td>
               <td data-label="Coverage">Original eagle-style sweep across four lanes, 3 uses per run</td>
-              <td data-label="Best Use">Wide rescue flyover when four stacked lanes need a light cleanup.</td>
+              <td data-label="Best Use">Late-run rescue buy that flies nose-first across four lanes.</td>
             </tr>
           </tbody>
         </table>
@@ -295,20 +295,29 @@
               <td data-label="Special Rule">Completely ignores mud slowdown.</td>
             </tr>
             <tr>
+              <td data-label="Chicken">Eggsplode Chicken</td>
+              <td data-label="Appears">5% spawn rate after 0:30</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">108</td>
+              <td data-label="Reward">$9</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Carries a volatile egg. If traffic kills it, the egg explodes, destroys the vehicle that hit it, and breaks your combo chain.</td>
+            </tr>
+            <tr>
               <td data-label="Chicken">Doomscroller</td>
               <td data-label="Appears">About 1 in 12 spawns after 2:00</td>
               <td data-label="Health">1</td>
               <td data-label="Speed">126</td>
               <td data-label="Reward">$0</td>
               <td data-label="Escape Damage">0</td>
-              <td data-label="Special Rule">Ignores mud. If traffic hits one, you lose $10 and it drops a goofy scrolling phone.</td>
+              <td data-label="Special Rule">Ignores mud. If traffic hits one, you lose $10 and it drops a goofy scrolling phone. If it safely crosses, you gain $10.</td>
             </tr>
             <tr>
               <td data-label="Chicken">Mother Hen</td>
               <td data-label="Appears">In pairs behind bruisers after 3:00</td>
-              <td data-label="Health">1</td>
+              <td data-label="Health">2</td>
               <td data-label="Speed">96</td>
-              <td data-label="Reward">$14</td>
+              <td data-label="Reward">$18</td>
               <td data-label="Escape Damage">1</td>
               <td data-label="Special Rule">Brown hen that hurls a comically large egg every 4 seconds. The egg can destroy a small car or truck, and it makes buses or the sky eagle swerve into another lane.</td>
             </tr>
@@ -323,6 +332,7 @@
             </tr>
           </tbody>
         </table>
+        <p class="note">Shielded birds can start appearing after 1:30. They are rare at first, ramp up over time, and their body color shows the current layer: green, blue, purple, then red.</p>
       </section>
 
       <section>
@@ -339,92 +349,120 @@
           </thead>
           <tbody>
             <tr>
-              <td data-label="Upgrade">Cheaper Cars</td>
+              <td data-label="Upgrade">Unlock Truck</td>
               <td data-label="Category">Vehicles</td>
-              <td data-label="Price">$18, $30, $41</td>
+              <td data-label="Price">$45</td>
+              <td data-label="Max">1</td>
+              <td data-label="Effect">Unlocks the truck for deployment and hotkey 2.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Unlock Bus</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$68</td>
+              <td data-label="Max">1</td>
+              <td data-label="Effect">Unlocks the bus for deployment and hotkey 3.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Unlock Plow</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$90</td>
+              <td data-label="Max">1</td>
+              <td data-label="Effect">Unlocks the snow plow for deployment and hotkey 4.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Unlock Eagle</td>
+              <td data-label="Category">Vehicles</td>
+              <td data-label="Price">$225</td>
+              <td data-label="Max">1</td>
+              <td data-label="Effect">Unlocks the sky eagle for deployment and hotkey 5.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Cheaper Cars</td>
+              <td data-label="Category">Parts</td>
+              <td data-label="Price">$27, $41, $61</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Small car cost is multiplied by 0.70 each level, with a $3 minimum.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Truck Rush</td>
-              <td data-label="Category">Vehicles</td>
-              <td data-label="Price">$22, $36, $51</td>
+              <td data-label="Category">Parts</td>
+              <td data-label="Price">$33, $50, $74</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Truck cooldown is multiplied by 0.70 each level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Long Bus</td>
-              <td data-label="Category">Vehicles</td>
-              <td data-label="Price">$24, $40, $55</td>
+              <td data-label="Category">Parts</td>
+              <td data-label="Price">$36, $54, $81</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Bus length is multiplied by 1.32 each level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Plow Tune</td>
-              <td data-label="Category">Vehicles</td>
-              <td data-label="Price">$28, $46, $64</td>
+              <td data-label="Category">Parts</td>
+              <td data-label="Price">$42, $63, $95</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Snow plow cooldown is multiplied by 0.65 each level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Loose Change</td>
               <td data-label="Category">Economy</td>
-              <td data-label="Price">$18, $30, $41</td>
+              <td data-label="Price">$36, $72, $144</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Each splat pays $1 more per level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Better Interest</td>
               <td data-label="Category">Economy</td>
-              <td data-label="Price">$16, $26, $37</td>
+              <td data-label="Price">$32, $64, $128</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Break interest gains +25% multiplier per level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Combo Ledger</td>
               <td data-label="Category">Economy</td>
-              <td data-label="Price">$14, $23, $32</td>
+              <td data-label="Price">$28, $56, $112</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Combo bonus pays $1 more per combo step per level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Break Grant</td>
               <td data-label="Category">Economy</td>
-              <td data-label="Price">$20, $33, $46</td>
+              <td data-label="Price">$40, $80, $160</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Every shop break gives +$8 flat cash per level, on top of interest.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Deeper Mud</td>
               <td data-label="Category">Map</td>
-              <td data-label="Price">$30, $50, $69</td>
+              <td data-label="Price">$45, $68, $101</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Mud slow multiplier drops by 0.05 each level, down to 0.10x minimum.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Mud Patch</td>
               <td data-label="Category">Map</td>
-              <td data-label="Price">$40, $66</td>
+              <td data-label="Price">$60, $90</td>
               <td data-label="Max">2</td>
               <td data-label="Effect">Adds one extra muddy lane per level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Safer Curbs</td>
               <td data-label="Category">Map</td>
-              <td data-label="Price">$44, $73</td>
-              <td data-label="Max">2</td>
-              <td data-label="Effect">Escape limit increases by 2 per level.</td>
+              <td data-label="Price">$66, $99, $149, $223, $335</td>
+              <td data-label="Max">5</td>
+              <td data-label="Effect">Escape limit increases by 2 per level, up to 20 total escapes.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Restock Wire</td>
               <td data-label="Category">Map</td>
-              <td data-label="Price">$18</td>
+              <td data-label="Price">$27, then 1.5x each repeat</td>
               <td data-label="Max">Repeatable when wire is broken</td>
               <td data-label="Effect">Reloads the final-row barbed wire trap so it can pop three normal chickens again.</td>
             </tr>
           </tbody>
         </table>
-        <p class="note">Upgrade prices use this run formula: base price x (1 + current level x 0.65), rounded to the nearest dollar.</p>
+        <p class="note">Upgrade prices now start at the boosted price immediately. Economy upgrades use base price x 2^(level+1), while Vehicles, Parts, and Map upgrades use base price x 1.5^(level+1), rounded to the nearest dollar.</p>
       </section>
     </main>
   </body>

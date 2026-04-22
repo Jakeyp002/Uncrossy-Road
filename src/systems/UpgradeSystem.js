@@ -21,7 +21,14 @@ export class UpgradeSystem {
       bonusCash: 0,
       interestMultiplier: 1,
       breakGrant: 0,
-      barbedWire: WORLD.barbedWireHits
+      barbedWire: WORLD.barbedWireHits,
+      unlockedVehicles: {
+        car: true,
+        truck: false,
+        bus: false,
+        plow: false,
+        roadblock: false
+      }
     };
   }
 
@@ -73,7 +80,12 @@ export class UpgradeSystem {
 
   getUpgradeCost(upgrade) {
     const level = this.levels[upgrade.id];
-    return Math.round(upgrade.baseCost * (1 + level * 0.65));
+    const multiplier = upgrade.category === "Economy" ? 2 : 1.5;
+    return Math.round(upgrade.baseCost * Math.pow(multiplier, level + 1));
+  }
+
+  isVehicleUnlocked(type) {
+    return Boolean(this.stats.unlockedVehicles[type]);
   }
 
   canBuy(upgrade) {
@@ -106,6 +118,7 @@ export class UpgradeSystem {
     if (upgrade.id === "safeCurbs") this.stats.escapeBonus += 2;
     if (upgrade.id === "restockWire") this.stats.barbedWire = WORLD.barbedWireHits;
     if (upgrade.id === "plowTune") this.stats.plowCooldownMultiplier *= 0.65;
+    if (upgrade.unlocksVehicle) this.stats.unlockedVehicles[upgrade.unlocksVehicle] = true;
 
     return true;
   }

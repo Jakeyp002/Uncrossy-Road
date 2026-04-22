@@ -27,10 +27,10 @@ export class ChickenSystem {
   rollShieldTier(typeId, runTime) {
     const type = CHICKENS[typeId];
     if (!type || typeId === "doomscroller" || typeId === "boss") return 0;
-    if (runTime < 180) return 0;
+    if (runTime < 90) return 0;
 
-    const elapsed = runTime - 180;
-    const shieldChance = Math.min(0.92, 0.25 * Math.pow(2, elapsed / 30));
+    const elapsed = runTime - 90;
+    const shieldChance = Math.min(0.78, 0.04 * Math.pow(2, elapsed / 45));
     if (Math.random() >= shieldChance) return 0;
 
     const rarityRoll = Math.random();
@@ -63,7 +63,8 @@ export class ChickenSystem {
       escaped: false,
       squash: 0,
       eggCooldown: type.eggCooldown ?? 0,
-      shieldTier: options.shieldTier ?? 0
+      shieldTier: options.shieldTier ?? 0,
+      crackTimer: 0
     };
     chicken.baseX = chicken.x;
     this.nextId += 1;
@@ -103,6 +104,7 @@ export class ChickenSystem {
       if (chicken.dead) continue;
       chicken.wobble += chicken.wobbleSpeed * dt;
       chicken.squash = Math.max(0, chicken.squash - dt * 8);
+      chicken.crackTimer = Math.max(0, chicken.crackTimer - dt);
       const zig = Math.sin(chicken.wobble) * 16 * chicken.panic;
       chicken.x += (chicken.vx + zig) * dt;
       const surfaceMultiplier = this.getSurfaceMultiplier(chicken);
@@ -195,18 +197,19 @@ export class ChickenSystem {
     this.effects.flashText("MEGA EGG!", chicken.x, chicken.y - 34, "#fff8df");
   }
 
-  hit(chicken, damage) {
+  hit(chicken, damage, source = "vehicle", vehicle = null, vehicles = null) {
     if (chicken.dead) return;
     if (chicken.shieldTier > 0) {
       chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
       chicken.squash = 1;
+      chicken.crackTimer = 0.4;
       this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
       return;
     }
     chicken.hp -= damage;
     chicken.squash = 1;
     if (chicken.hp <= 0) {
-      this.splat(chicken, 0, "vehicle");
+      this.splat(chicken, 0, source, vehicle, vehicles);
     }
   }
 
@@ -214,7 +217,7 @@ export class ChickenSystem {
     return CHICKENS[chicken.typeId];
   }
 
-  splat(chicken, extraDamage = 0, source = "vehicle") {
+  splat(chicken, extraDamage = 0, source = "vehicle", vehicle = null, vehicles = null) {
     if (chicken.dead) return;
     const type = CHICKENS[chicken.typeId];
     if (type.penaltyOnHit && source === "vehicle") {
@@ -232,6 +235,15 @@ export class ChickenSystem {
     }
     chicken.hp -= extraDamage;
     chicken.dead = true;
+    if (type.explodeOnDeath && source === "vehicle") {
+      if (vehicle && vehicles) {
+        vehicles.destroyVehicle(vehicle, chicken.x, chicken.y, "explode");
+      }
+      this.economy.combo = 0;
+      this.economy.comboTimer = 0;
+      this.effects.flashText("CHAIN BROKEN", chicken.x, chicken.y - 52, "#ff8b3d");
+      this.effects.bombBurst(chicken.x, chicken.y);
+    }
     const reward = source === "roadblock" ? Math.max(6, Math.round(chicken.reward * 0.65)) : chicken.reward;
     const payout = this.economy.earnSplat(reward, this.upgrades.stats.bonusCash);
     this.effects.splat(chicken.x, chicken.y, payout.amount, payout.combo);
@@ -280,6 +292,7 @@ export class ChickenSystem {
       this.upgrades.stats.barbedWire = Math.max(0, this.upgrades.stats.barbedWire - 1);
       chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
       chicken.squash = 1;
+      chicken.crackTimer = 0.4;
       this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
       const text = this.upgrades.stats.barbedWire > 0 ? `WIRE ${this.upgrades.stats.barbedWire} LEFT` : "WIRE BREAK";
       this.effects.flashText(text, chicken.x, chicken.y - 36, "#e94742");

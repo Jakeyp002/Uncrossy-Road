@@ -69,7 +69,7 @@ export const VEHICLES = {
     speed: 475,
     length: 124,
     height: 42,
-    damage: 2,
+    damage: 4,
     color: "#f56f41",
     accent: "#f8faf7",
     rarity: "uncommon"
@@ -217,6 +217,19 @@ export const CHICKENS = {
     eggCooldown: 4,
     chance: 0
   },
+  eggsplode: {
+    id: "eggsplode",
+    name: "Eggsplode Chicken",
+    description: "Rare after 0:30. Carries a volatile egg that explodes on death, destroying the vehicle that hit it and breaking combo flow.",
+    hp: 1,
+    radius: 16,
+    speed: 108,
+    reward: 9,
+    color: "#fff2b0",
+    accent: "#f28c28",
+    explodeOnDeath: true,
+    chance: 0
+  },
   boss: {
     id: "boss",
     name: "Boss Chicken",
@@ -237,8 +250,44 @@ export const CHICKENS = {
 
 export const UPGRADES = [
   {
-    id: "cheapCars",
+    id: "unlockTruck",
     category: "Vehicles",
+    title: "Unlock Truck",
+    text: "unlocks truck deploy",
+    baseCost: VEHICLES.truck.cost * 3,
+    maxLevel: 1,
+    unlocksVehicle: "truck"
+  },
+  {
+    id: "unlockBus",
+    category: "Vehicles",
+    title: "Unlock Bus",
+    text: "unlocks bus deploy",
+    baseCost: VEHICLES.bus.cost * 3,
+    maxLevel: 1,
+    unlocksVehicle: "bus"
+  },
+  {
+    id: "unlockPlow",
+    category: "Vehicles",
+    title: "Unlock Plow",
+    text: "unlocks snow plow deploy",
+    baseCost: VEHICLES.plow.cost * 3,
+    maxLevel: 1,
+    unlocksVehicle: "plow"
+  },
+  {
+    id: "unlockRoadblock",
+    category: "Vehicles",
+    title: "Unlock Eagle",
+    text: "unlocks sky eagle deploy",
+    baseCost: VEHICLES.roadblock.cost * 3,
+    maxLevel: 1,
+    unlocksVehicle: "roadblock"
+  },
+  {
+    id: "cheapCars",
+    category: "Parts",
     title: "Cheaper Cars",
     text: "-30% car cost",
     baseCost: 18,
@@ -246,7 +295,7 @@ export const UPGRADES = [
   },
   {
     id: "truckCooldown",
-    category: "Vehicles",
+    category: "Parts",
     title: "Truck Rush",
     text: "-30% truck cooldown",
     baseCost: 22,
@@ -254,7 +303,7 @@ export const UPGRADES = [
   },
   {
     id: "longBus",
-    category: "Vehicles",
+    category: "Parts",
     title: "Long Bus",
     text: "+32% bus length",
     baseCost: 24,
@@ -314,7 +363,7 @@ export const UPGRADES = [
     title: "Safer Curbs",
     text: "+2 escape limit",
     baseCost: 44,
-    maxLevel: 2
+    maxLevel: 5
   },
   {
     id: "restockWire",
@@ -327,7 +376,7 @@ export const UPGRADES = [
   },
   {
     id: "plowTune",
-    category: "Vehicles",
+    category: "Parts",
     title: "Plow Tune",
     text: "-35% plow cooldown",
     baseCost: 28,

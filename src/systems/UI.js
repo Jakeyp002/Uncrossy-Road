@@ -2,6 +2,10 @@ import { UPGRADES, VEHICLES } from "../config.js";
 import { formatTime } from "../utils.js";
 
 const UPGRADE_ICONS = {
+  unlockTruck: "TRK",
+  unlockBus: "BUS",
+  unlockPlow: "PLW",
+  unlockRoadblock: "EGL",
   cheapCars: "CAR",
   truckCooldown: "SPD",
   longBus: "BUS",
@@ -31,14 +35,14 @@ const TUTORIAL_CARDS = [
   },
   {
     title: "Every vehicle has a job.",
-    body: "Cars are your cheap panic answer. Trucks punch through bruisers. Buses cover a long lane. Plows sweep two lanes slowly. The Sky Eagle is a rare emergency button for four lanes at once.",
-    tags: ["Car = cheap", "Truck = reliable", "Bus = long lane", "Plow = two lanes", "Eagle = rescue"],
+    body: "The blue car starts unlocked. Buy the truck, bus, plow, and eagle from the Vehicles shelf during breaks, then use Parts upgrades to tune them once they are online.",
+    tags: ["Blue car starts", "Buy vehicles in shop", "Parts upgrade them", "Truck = heavy hit"],
     scene: "scene-vehicles"
   },
   {
     title: "Know the troublemakers.",
-    body: "Darters sprint, bruisers soak hits, jumpers ignore mud, mud chickens stay fast in sludge, doomscrollers cost you cash when hit, mothers lob giant eggs, and bosses crawl in as giant disasters.",
-    tags: ["Darter", "Bruiser", "Mud chicken", "Doomscroller", "Mother hen", "Boss"],
+    body: "Darters sprint, bruisers soak hits, jumpers ignore mud, mud chickens stay fast in sludge, doomscrollers cost you cash when hit, mothers lob giant eggs, and shield birds can start showing up at 1:30 with color tiers that crack down one step at a time.",
+    tags: ["Darter", "Bruiser", "Shield colors", "Doomscroller", "Mother hen", "Boss"],
     scene: "scene-enemies"
   },
   {
@@ -64,15 +68,14 @@ export class UI {
     this.shopTimer = document.querySelector("#shopTimer");
     this.shopInfo = document.querySelector("#shopInfo");
     this.overlay = document.querySelector("#overlay");
+    this.gameOverSplashView = document.querySelector("#gameOverSplashView");
+    this.gameOverSplashCard = document.querySelector("#gameOverSplashCard");
+    this.gameOverSplashImage = document.querySelector("#gameOverSplashImage");
     this.menuView = document.querySelector("#menuView");
     this.tutorialView = document.querySelector("#tutorialView");
     this.overlayTitle = document.querySelector("#overlayTitle");
     this.overlayTagline = document.querySelector("#overlayTagline");
     this.overlaySmall = document.querySelector("#overlaySmall");
-    this.resultSnapshot = document.querySelector("#resultSnapshot");
-    this.resultLabel = document.querySelector("#resultLabel");
-    this.resultHeadline = document.querySelector("#resultHeadline");
-    this.resultStats = document.querySelector("#resultStats");
     this.startButton = document.querySelector("#startButton");
     this.guideButton = document.querySelector("#guideButton");
     this.tutorialButton = document.querySelector("#tutorialButton");
@@ -83,10 +86,11 @@ export class UI {
     this.tutorialStep = document.querySelector("#tutorialStep");
     this.tutorialTitle = document.querySelector("#tutorialTitle");
     this.tutorialBody = document.querySelector("#tutorialBody");
-    this.tutorialScene = document.querySelector("#tutorialScene");
+    this.tutorialImage = document.querySelector("#tutorialImage");
     this.tutorialTags = document.querySelector("#tutorialTags");
     this.activeInfoUpgrade = null;
     this.tutorialIndex = 0;
+    this.gameOverDexRevealed = false;
     this.renderButtons();
     this.startButton.addEventListener("click", () => this.game.startRun());
     this.tutorialStartButton.addEventListener("click", () => this.game.startRun());
@@ -97,6 +101,13 @@ export class UI {
     this.tutorialBackButton.addEventListener("click", () => this.showMenu());
     this.tutorialPrevButton.addEventListener("click", () => this.stepTutorial(-1));
     this.tutorialNextButton.addEventListener("click", () => this.stepTutorial(1));
+    this.gameOverSplashCard.addEventListener("click", () => this.revealGameOverDex());
+    this.gameOverSplashCard.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        this.revealGameOverDex();
+      }
+    });
   }
 
   renderButtons() {
@@ -117,7 +128,7 @@ export class UI {
     }
 
     this.upgradeButtons.innerHTML = "";
-    const categories = ["Vehicles", "Economy", "Map"];
+    const categories = ["Vehicles", "Parts", "Economy", "Map"];
     for (const category of categories) {
       const upgrades = UPGRADES.filter((upgrade) => (upgrade.category ?? "Run") === category);
       if (upgrades.length > 0) {
@@ -170,19 +181,31 @@ export class UI {
     for (const button of this.vehicleButtons.querySelectorAll("button")) {
       const type = button.dataset.vehicle;
       const vehicle = VEHICLES[type];
+      const unlockUpgrade = UPGRADES.find((upgrade) => upgrade.unlocksVehicle === type);
+      const unlocked = game.upgrades.isVehicleUnlocked(type);
       const cost = game.upgrades.getVehicleCost(type);
       const cooldown = game.vehicles.cooldowns[type];
       const main = button.querySelector(".button-main");
       const sub = button.querySelector(".button-sub");
+      button.hidden = !unlocked;
       button.classList.toggle("selected", game.selectedVehicle === type);
       const usedUp = vehicle.maxUses && game.vehicles.uses[type] >= vehicle.maxUses;
-      button.title = `${vehicle.name} - key ${vehicle.key}`;
-      button.disabled = game.mode !== "playing" || breakInfo.active || !game.economy.canAfford(cost) || cooldown > 0 || usedUp;
-      main.textContent = `$${cost}`;
+      button.classList.toggle("locked", !unlocked);
+      button.title = unlocked ? `${vehicle.name} - key ${vehicle.key}` : `${vehicle.name} - unlock in Vehicles`;
+      button.disabled =
+        !unlocked ||
+        game.mode !== "playing" ||
+        breakInfo.active ||
+        !game.economy.canAfford(cost) ||
+        cooldown > 0 ||
+        usedUp;
+      main.textContent = unlocked ? `$${cost}` : "LOCK";
       const rescueProgress = type === "car" ? game.getSafetyNetProgress() : 0;
       button.classList.toggle("rescue-loading", rescueProgress > 0);
       button.style.setProperty("--rescue-progress", `${rescueProgress}`);
-      if (usedUp) {
+      if (!unlocked) {
+        sub.textContent = unlockUpgrade ? `Shop $${game.upgrades.getUpgradeCost(unlockUpgrade)}` : "Shop";
+      } else if (usedUp) {
         sub.textContent = "Used";
       } else if (cooldown > 0) {
         sub.textContent = `${cooldown.toFixed(1)}s`;
@@ -214,30 +237,26 @@ export class UI {
 
   showStart() {
     this.overlay.classList.add("visible");
+    this.gameOverSplashView.hidden = true;
     this.showMenu();
+    this.gameOverDexRevealed = false;
     this.overlayTitle.textContent = "Uncrossy Road";
     this.overlayTagline.textContent =
       "Send toy traffic into the lanes. Mud roads slow the flock. Shop breaks last 15 seconds.";
     this.overlaySmall.textContent =
       "Fast runs. No saved upgrades. No mercy from poultry.";
     this.startButton.textContent = "Start Run";
-    this.resultSnapshot.hidden = true;
     this.setChickenDex([]);
   }
 
   showGameOver() {
     this.overlay.classList.add("visible");
-    this.showMenu();
-    this.overlayTitle.textContent = "Run Over";
-    this.overlayTagline.textContent =
-      `${this.game.economy.splats} splats, best combo x${this.game.economy.bestCombo}, survived ${formatTime(this.game.runTime)}.`;
-    this.startButton.textContent = "Try Again";
-    this.resultSnapshot.hidden = false;
-    this.resultLabel.textContent = "Last Run";
-    this.resultHeadline.textContent = this.game.economy.bestCombo >= 6 ? "That one nearly held." : "The road got away from you.";
-    this.resultStats.textContent = `${this.game.economy.splats} splats • $${this.game.economy.totalEarned} earned • ${formatTime(this.game.runTime)} lived`;
-    this.overlaySmall.textContent = "Cash and run upgrades are gone. Study the guide, then jump right back in.";
-    this.setChickenDex(this.game.getUnlockedChickenInfo());
+    this.gameOverSplashView.hidden = false;
+    this.menuView.hidden = true;
+    this.tutorialView.hidden = true;
+    this.gameOverDexRevealed = false;
+    this.gameOverSplashImage.src = this.game.gameOverSnapshot ?? this.game.renderer.captureCurrentView();
+    this.setChickenDex(this.game.getUnlockedChickenInfo(), false);
   }
 
   hideOverlay() {
@@ -245,6 +264,7 @@ export class UI {
   }
 
   showMenu() {
+    this.gameOverSplashView.hidden = true;
     this.menuView.hidden = false;
     this.tutorialView.hidden = true;
   }
@@ -266,25 +286,35 @@ export class UI {
     this.tutorialStep.textContent = `Card ${this.tutorialIndex + 1} / ${TUTORIAL_CARDS.length}`;
     this.tutorialTitle.textContent = card.title;
     this.tutorialBody.textContent = card.body;
-    this.tutorialScene.className = `snapshot-scene tutorial-scene ${card.scene}`;
-    this.tutorialScene.innerHTML = `
-      <div class="snapshot-road"></div>
-      <div class="snapshot-vehicle"></div>
-      <div class="snapshot-bird flock-a"></div>
-      <div class="snapshot-bird flock-b"></div>
-      <div class="snapshot-burst"></div>
-    `;
+    if (!card.image) {
+      card.image = this.game.renderer.captureTutorialShot(card.scene);
+    }
+    this.tutorialImage.src = card.image;
+    this.tutorialImage.alt = `${card.title} tutorial snapshot`;
     this.tutorialTags.innerHTML = card.tags.map((tag) => `<span class="tutorial-tag">${tag}</span>`).join("");
   }
 
-  setChickenDex(chickens) {
+  revealGameOverDex() {
+    if (this.game.mode !== "gameover" || this.gameOverDexRevealed) return;
+    this.gameOverDexRevealed = true;
+    this.gameOverSplashView.hidden = true;
+    this.showMenu();
+    this.overlayTitle.textContent = "Run Over";
+    this.overlayTagline.textContent =
+      `${this.game.economy.splats} splats, best combo x${this.game.economy.bestCombo}, survived ${formatTime(this.game.runTime)}.`;
+    this.startButton.textContent = "Try Again";
+    this.overlaySmall.textContent = "Cash and run upgrades are gone. Here are the birds you unlocked this run.";
+    this.setChickenDex(this.game.getUnlockedChickenInfo(), true);
+  }
+
+  setChickenDex(chickens, reveal = false) {
     const dex = document.querySelector("#chickenDex");
     if (!dex) return;
-    dex.hidden = chickens.length === 0;
+    dex.hidden = chickens.length === 0 || !reveal;
     dex.innerHTML = chickens
       .map(
         (chicken) =>
-          `<article class="dex-card"><div class="dex-photo dex-${chicken.id}"></div><strong>${chicken.name}</strong><span>${chicken.description}</span></article>`
+          `<article class="dex-card"><img class="dex-photo-img" src="${this.game.renderer.captureChickenPortrait(chicken.id)}" alt="${chicken.name} portrait" /><strong>${chicken.name}</strong><span>${chicken.description}</span></article>`
       )
       .join("");
   }
