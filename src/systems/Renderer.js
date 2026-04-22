@@ -248,6 +248,20 @@ export class Renderer {
     ctx.fillStyle = "rgba(0,0,0,0.18)";
     ctx.fillRect(-17, 18 + hop, 34, 9);
 
+    if (chicken.shieldTier > 0) {
+      const shieldColors = ["#39d96a", "#4fb8ff", "#a66cff", "#e94742"];
+      const shieldColor = shieldColors[chicken.shieldTier - 1];
+      ctx.globalAlpha = 0.22;
+      ctx.fillStyle = shieldColor;
+      ctx.fillRect(-28, -28, 58, 58);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = shieldColor;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(-24, -24, 50, 50);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-29, -29, 60, 60);
+    }
+
     this.block(ctx, -17, -14, 34, 31, 8, type.color);
     this.block(ctx, 9, -28, 22, 21, 7, type.color);
 
@@ -510,6 +524,10 @@ export class Renderer {
       } else if (particle.shape === "shard") {
         ctx.fillStyle = particle.color;
         ctx.fillRect(-particle.size * 0.45, -particle.size * 0.2, particle.size * 0.9, particle.size * 0.4);
+      } else if (particle.shape === "shield") {
+        ctx.strokeStyle = particle.color;
+        ctx.lineWidth = Math.max(2, particle.size * 0.18);
+        ctx.strokeRect(-particle.size * 0.45, -particle.size * 0.45, particle.size * 0.9, particle.size * 0.9);
       } else {
         ctx.fillStyle = particle.color;
         ctx.fillRect(-particle.size * 0.5, -particle.size * 0.25, particle.size, particle.size * 0.5);

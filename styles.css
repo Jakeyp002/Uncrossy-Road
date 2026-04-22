@@ -270,6 +270,7 @@ button.selected {
 }
 
 .vehicle-button {
+  position: relative;
   min-height: 40px;
   display: grid;
   grid-template-rows: 26px auto;
@@ -279,6 +280,22 @@ button.selected {
   border: 2px solid transparent;
   background: rgba(255, 255, 255, 0.56);
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.vehicle-timer {
+  position: absolute;
+  inset: 3px;
+  border-radius: 6px;
+  opacity: 0;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.78) 60%, rgba(255, 255, 255, 0) 64%),
+    conic-gradient(from -90deg, rgba(57, 217, 204, 0.9) calc(var(--rescue-progress, 0) * 1turn), rgba(255, 255, 255, 0) 0);
+  transition: opacity 120ms ease;
+  pointer-events: none;
+}
+
+.vehicle-button.rescue-loading .vehicle-timer {
+  opacity: 1;
 }
 
 .rarity-common {

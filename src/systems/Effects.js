@@ -140,6 +140,35 @@ export class Effects {
     }
   }
 
+  shieldBreak(x, y, remainingTier) {
+    const palette = ["#fff8df", "#39d96a", "#4fb8ff", "#a66cff", "#e94742"];
+    const color = palette[Math.max(0, Math.min(palette.length - 1, remainingTier + 1))];
+    this.shake(remainingTier === 0 ? 9 : 6);
+    this.popups.push({
+      x,
+      y: y - 26,
+      text: remainingTier > 0 ? "SHIELD DOWN" : "SHIELD POP",
+      color,
+      life: 0.75,
+      scale: 1
+    });
+
+    for (let i = 0; i < 14; i += 1) {
+      this.particles.push({
+        x: x + rand(-8, 8),
+        y: y + rand(-8, 8),
+        vx: rand(-180, 180),
+        vy: rand(-220, -50),
+        size: rand(4, 10),
+        life: rand(0.35, 0.7),
+        color,
+        shape: "shield",
+        spin: rand(0, Math.PI * 2),
+        spinSpeed: rand(-8, 8)
+      });
+    }
+  }
+
   deploy(lane) {
     this.laneBursts.push({
       y: lane.centerY,

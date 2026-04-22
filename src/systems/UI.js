@@ -107,6 +107,7 @@ export class UI {
       button.className = `vehicle-button rarity-${vehicle.rarity ?? "common"}`;
       button.dataset.vehicle = vehicle.id;
       button.innerHTML = `
+        <span class="vehicle-timer" aria-hidden="true"></span>
         <span class="vehicle-icon vehicle-icon-${vehicle.id}"><span></span></span>
         <span class="button-main"></span>
         <span class="button-sub"></span>
@@ -178,10 +179,15 @@ export class UI {
       button.title = `${vehicle.name} - key ${vehicle.key}`;
       button.disabled = game.mode !== "playing" || breakInfo.active || !game.economy.canAfford(cost) || cooldown > 0 || usedUp;
       main.textContent = `$${cost}`;
+      const rescueProgress = type === "car" ? game.getSafetyNetProgress() : 0;
+      button.classList.toggle("rescue-loading", rescueProgress > 0);
+      button.style.setProperty("--rescue-progress", `${rescueProgress}`);
       if (usedUp) {
         sub.textContent = "Used";
       } else if (cooldown > 0) {
         sub.textContent = `${cooldown.toFixed(1)}s`;
+      } else if (rescueProgress > 0) {
+        sub.textContent = `${Math.max(1, Math.ceil(5 - game.rescueTimer))}s aid`;
       } else {
         const uses = vehicle.maxUses ? ` ${vehicle.maxUses - game.vehicles.uses[type]}/${vehicle.maxUses}` : "";
         sub.textContent = `$${cost}${uses}`;
