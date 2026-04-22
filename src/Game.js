@@ -24,6 +24,7 @@ export class Game {
     this.selectedVehicle = "car";
     this.selectedLaneIndex = 0;
     this.vehicleDirection = 1;
+    this.rescueTimer = 0;
 
     this.audio = new AudioSystem();
     this.effects = new Effects();
@@ -50,6 +51,7 @@ export class Game {
     this.breakRemaining = 0;
     this.nextBreakAt = WORLD.playSecondsBeforeBreak;
     this.selectedVehicle = "car";
+    this.rescueTimer = 0;
     this.effects.reset();
     this.economy.reset();
     this.upgrades.reset();
@@ -87,6 +89,7 @@ export class Game {
 
     this.economy.update(dt);
     this.lanes.update(dt);
+    this.updateSafetyNet(dt);
 
     // System order keeps the loop readable: spawn, move traffic, resolve chickens, then check fail state.
     this.spawner.update(dt, this.runTime, this.chickens);
@@ -99,6 +102,23 @@ export class Game {
       return;
     }
 
+  }
+
+  updateSafetyNet(dt) {
+    const cheapestCarCost = this.upgrades.getVehicleCost("car");
+    if (this.economy.cash >= cheapestCarCost) {
+      this.rescueTimer = 0;
+      return;
+    }
+
+    this.rescueTimer += dt;
+    if (this.rescueTimer < 5) return;
+
+    const grant = cheapestCarCost - this.economy.cash;
+    this.economy.cash += grant;
+    this.economy.totalEarned += grant;
+    this.rescueTimer = 0;
+    this.effects.flashText(`Safety net +$${grant}`, WORLD.width * 0.5, 176, "#39d9cc");
   }
 
   selectVehicle(type) {
@@ -155,6 +175,12 @@ export class Game {
 
   getEscapeLimit() {
     return this.upgrades.getEscapeLimit();
+  }
+
+  getSafetyNetProgress() {
+    const cheapestCarCost = this.upgrades.getVehicleCost("car");
+    if (this.mode !== "playing" || this.isBreakActive() || this.economy.cash >= cheapestCarCost) return 0;
+    return Math.min(1, this.rescueTimer / 5);
   }
 
   getUnlockedChickenInfo() {

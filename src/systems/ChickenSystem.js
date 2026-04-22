@@ -18,6 +18,28 @@ export class ChickenSystem {
     this.seenTypes = new Set();
   }
 
+  getSpawnModifiers(typeId, runTime) {
+    return {
+      shieldTier: this.rollShieldTier(typeId, runTime)
+    };
+  }
+
+  rollShieldTier(typeId, runTime) {
+    const type = CHICKENS[typeId];
+    if (!type || typeId === "doomscroller" || typeId === "boss") return 0;
+    if (runTime < 180) return 0;
+
+    const elapsed = runTime - 180;
+    const shieldChance = Math.min(0.92, 0.25 * Math.pow(2, elapsed / 30));
+    if (Math.random() >= shieldChance) return 0;
+
+    const rarityRoll = Math.random();
+    if (rarityRoll < 0.58) return 1;
+    if (rarityRoll < 0.83) return 2;
+    if (rarityRoll < 0.95) return 3;
+    return 4;
+  }
+
   spawn(typeId, difficulty = 0, options = {}) {
     const type = CHICKENS[typeId];
     this.seenTypes.add(typeId);
@@ -40,7 +62,8 @@ export class ChickenSystem {
       dead: false,
       escaped: false,
       squash: 0,
-      eggCooldown: type.eggCooldown ?? 0
+      eggCooldown: type.eggCooldown ?? 0,
+      shieldTier: options.shieldTier ?? 0
     };
     chicken.baseX = chicken.x;
     this.nextId += 1;
@@ -48,20 +71,22 @@ export class ChickenSystem {
     return chicken;
   }
 
-  spawnMotherPair(difficulty = 0) {
-    const leader = this.spawn("tough", difficulty);
+  spawnMotherPair(difficulty = 0, runTime = 0) {
+    const leader = this.spawn("tough", difficulty, this.getSpawnModifiers("tough", runTime));
     const motherSpeed = CHICKENS.mother.speed + difficulty * 10;
     this.spawn("mother", difficulty, {
       x: leader.x - 24,
       y: leader.y - 52,
       vy: motherSpeed,
-      vx: leader.vx - 5
+      vx: leader.vx - 5,
+      shieldTier: this.rollShieldTier("mother", runTime)
     });
     this.spawn("mother", difficulty, {
       x: leader.x + 24,
       y: leader.y - 98,
       vy: motherSpeed,
-      vx: leader.vx + 5
+      vx: leader.vx + 5,
+      shieldTier: this.rollShieldTier("mother", runTime)
     });
   }
 
@@ -97,11 +122,20 @@ export class ChickenSystem {
         const type = CHICKENS[chicken.typeId];
         const escapeDamage = type.escapeDamage ?? 1;
         this.escaped += escapeDamage;
-        this.effects.escape(chicken.x, WORLD.height - 36);
+        if (type.rewardOnEscape) {
+          this.economy.cash += type.rewardOnEscape;
+          this.economy.totalEarned += type.rewardOnEscape;
+          this.effects.flashText(`SAFE +$${type.rewardOnEscape}`, chicken.x, WORLD.height - 104, "#39d96a");
+        }
+        if (escapeDamage > 0) {
+          this.effects.escape(chicken.x, WORLD.height - 36);
+        }
         if (escapeDamage > 1) {
           this.effects.flashText(`-${escapeDamage} ESCAPES`, chicken.x, WORLD.height - 72, "#e94742");
         }
-        this.audio.escape();
+        if (escapeDamage > 0) {
+          this.audio.escape();
+        }
       }
     }
 
@@ -163,6 +197,12 @@ export class ChickenSystem {
 
   hit(chicken, damage) {
     if (chicken.dead) return;
+    if (chicken.shieldTier > 0) {
+      chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
+      chicken.squash = 1;
+      this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
+      return;
+    }
     chicken.hp -= damage;
     chicken.squash = 1;
     if (chicken.hp <= 0) {
@@ -234,7 +274,17 @@ export class ChickenSystem {
     if (this.upgrades.stats.barbedWire <= 0 || chicken.dead) return;
     const finalLaneTop = WORLD.roadTop + (WORLD.laneCount - 1) * (WORLD.laneHeight + WORLD.laneGap);
     const type = CHICKENS[chicken.typeId];
+    if (type.penaltyOnHit || type.escapeDamage === 0) return;
     if (chicken.y < finalLaneTop || chicken.y > finalLaneTop + WORLD.laneHeight) return;
+    if (chicken.shieldTier > 0) {
+      this.upgrades.stats.barbedWire = Math.max(0, this.upgrades.stats.barbedWire - 1);
+      chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
+      chicken.squash = 1;
+      this.effects.shieldBreak(chicken.x, chicken.y, chicken.shieldTier);
+      const text = this.upgrades.stats.barbedWire > 0 ? `WIRE ${this.upgrades.stats.barbedWire} LEFT` : "WIRE BREAK";
+      this.effects.flashText(text, chicken.x, chicken.y - 36, "#e94742");
+      return;
+    }
     if (chicken.hp > 1 || type.oneTapImmune) return;
     this.upgrades.stats.barbedWire = Math.max(0, this.upgrades.stats.barbedWire - 1);
     this.splat(chicken, 0, "wire");
