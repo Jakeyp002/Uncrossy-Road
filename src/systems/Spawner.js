@@ -71,9 +71,9 @@ export class Spawner {
   spawnEntry(chickens, difficulty, runTime) {
     const typeId = this.pickChickenType(difficulty, runTime);
     if (typeId === "motherPair") {
-      chickens.spawnMotherPair(difficulty);
+      chickens.spawnMotherPair(difficulty, runTime);
       return;
     }
-    chickens.spawn(typeId, difficulty);
+    chickens.spawn(typeId, difficulty, chickens.getSpawnModifiers(typeId, runTime));
   }
 }

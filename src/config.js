@@ -195,6 +195,8 @@ export const CHICKENS = {
     radius: 16,
     speed: 126,
     reward: 0,
+    rewardOnEscape: 10,
+    escapeDamage: 0,
     penaltyOnHit: 10,
     color: "#f3d0b0",
     accent: "#d94c6a",
