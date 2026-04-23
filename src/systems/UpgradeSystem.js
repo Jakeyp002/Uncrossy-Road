@@ -9,10 +9,11 @@ export class UpgradeSystem {
   }
 
   reset() {
+    this.mudClosed = false;
     this.levels = Object.fromEntries(UPGRADES.map((upgrade) => [upgrade.id, 0]));
     this.stats = {
       carCostMultiplier: 1,
-      truckCooldownMultiplier: 1,
+      truckDamageBonus: 0,
       busLengthMultiplier: 1,
       plowCooldownMultiplier: 1,
       mudSlowMultiplier: WORLD.mudSlowMultiplier,
@@ -24,6 +25,12 @@ export class UpgradeSystem {
       barbedWire: WORLD.barbedWireHits,
       unlockedVehicles: {
         car: true,
+        truck: false,
+        bus: false,
+        plow: false,
+        roadblock: false
+      },
+      evolvedVehicles: {
         truck: false,
         bus: false,
         plow: false,
@@ -44,13 +51,18 @@ export class UpgradeSystem {
 
   getVehicleCooldown(type) {
     const base = VEHICLES[type].cooldown;
-    if (type === "truck") {
-      return base * this.stats.truckCooldownMultiplier;
-    }
     if (type === "plow") {
       return base * this.stats.plowCooldownMultiplier;
     }
     return base;
+  }
+
+  getVehicleDamage(type) {
+    const damage = VEHICLES[type].damage + (type === "truck" ? this.stats.truckDamageBonus : 0);
+    if (type === "truck" && this.isVehicleEvolved("truck")) {
+      return Math.max(3, damage);
+    }
+    return damage;
   }
 
   getVehicleLength(type) {
@@ -73,13 +85,19 @@ export class UpgradeSystem {
     return WORLD.escapeLimit + this.stats.escapeBonus;
   }
 
+  setMudClosed(closed) {
+    this.mudClosed = closed;
+  }
+
   isMudLane(index) {
+    if (this.mudClosed) return false;
     if (WORLD.mudLaneIndices.includes(index)) return true;
     return WORLD.extraMudLaneIndices.slice(0, this.stats.extraMudLanes).includes(index);
   }
 
   getUpgradeCost(upgrade) {
     const level = this.levels[upgrade.id];
+    if (upgrade.category === "Evolution") return upgrade.baseCost;
     const multiplier = upgrade.category === "Economy" ? 2 : 1.5;
     return Math.round(upgrade.baseCost * Math.pow(multiplier, level + 1));
   }
@@ -88,8 +106,13 @@ export class UpgradeSystem {
     return Boolean(this.stats.unlockedVehicles[type]);
   }
 
+  isVehicleEvolved(type) {
+    return Boolean(this.stats.evolvedVehicles[type]);
+  }
+
   canBuy(upgrade) {
     if (upgrade.id === "restockWire" && this.stats.barbedWire > 0) return false;
+    if (upgrade.requiresVehicle && !this.isVehicleUnlocked(upgrade.requiresVehicle)) return false;
     return this.levels[upgrade.id] < upgrade.maxLevel && this.economy.canAfford(this.getUpgradeCost(upgrade));
   }
 
@@ -107,7 +130,7 @@ export class UpgradeSystem {
     this.effects.flashText(upgrade.title, 640, 92, "#32ca63");
 
     if (upgrade.id === "cheapCars") this.stats.carCostMultiplier *= 0.7;
-    if (upgrade.id === "truckCooldown") this.stats.truckCooldownMultiplier *= 0.7;
+    if (upgrade.id === "truckCooldown") this.stats.truckDamageBonus += 1;
     if (upgrade.id === "longBus") this.stats.busLengthMultiplier *= 1.32;
     if (upgrade.id === "bonusCash") this.stats.bonusCash += 1;
     if (upgrade.id === "interestBoost") this.stats.interestMultiplier += 0.25;
@@ -119,6 +142,10 @@ export class UpgradeSystem {
     if (upgrade.id === "restockWire") this.stats.barbedWire = WORLD.barbedWireHits;
     if (upgrade.id === "plowTune") this.stats.plowCooldownMultiplier *= 0.65;
     if (upgrade.unlocksVehicle) this.stats.unlockedVehicles[upgrade.unlocksVehicle] = true;
+    if (upgrade.id === "truckEvo") this.stats.evolvedVehicles.truck = true;
+    if (upgrade.id === "busEvo") this.stats.evolvedVehicles.bus = true;
+    if (upgrade.id === "plowEvo") this.stats.evolvedVehicles.plow = true;
+    if (upgrade.id === "roadblockEvo") this.stats.evolvedVehicles.roadblock = true;
 
     return true;
   }

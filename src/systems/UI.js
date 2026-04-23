@@ -7,9 +7,13 @@ const UPGRADE_ICONS = {
   unlockPlow: "PLW",
   unlockRoadblock: "EGL",
   cheapCars: "CAR",
-  truckCooldown: "SPD",
+  truckCooldown: "DMG",
   longBus: "BUS",
   plowTune: "PLW",
+  truckEvo: "TRK+",
+  busEvo: "BUS+",
+  plowEvo: "ICE",
+  roadblockEvo: "EGL+",
   bonusCash: "$+",
   interestBoost: "%+",
   comboLedger: "X+",
@@ -41,14 +45,14 @@ const TUTORIAL_CARDS = [
   },
   {
     title: "Know the troublemakers.",
-    body: "Darters sprint, bruisers soak hits, jumpers ignore mud, mud chickens stay fast in sludge, doomscrollers cost you cash when hit, mothers lob giant eggs, and shield birds can start showing up at 1:30 with color tiers that crack down one step at a time.",
-    tags: ["Darter", "Bruiser", "Shield colors", "Doomscroller", "Mother hen", "Boss"],
+    body: "Darters sprint, cash chickens pay big, bruisers soak hits, doomscrollers cost you cash when hit, mothers lob giant eggs, and shield birds begin as green at 0:30 before blue, purple, then rare red layers unlock later.",
+    tags: ["Darter", "Cash chicken", "Shield colors", "Doomscroller", "Mother hen", "Boss"],
     scene: "scene-enemies"
   },
   {
     title: "Play for flow, not panic.",
-    body: "Mud lanes are your best stalling tool. Do not spam the same road until it locks red. Save your wide vehicles for stacked lanes, and try to splat in bursts so combos keep the cash flowing.",
-    tags: ["Mud is tempo", "avoid lane lock", "save wide coverage", "combo for cash"],
+    body: "Mud lanes are your best stalling tool until the 3:45 blitz. Kill the rainbow Blitz Chicken to earn $75 and start the warning countdown, then use the cash before the mud closes.",
+    tags: ["Mud is tempo", "warning waves", "avoid lane lock", "combo for cash"],
     scene: "scene-strategy"
   }
 ];
@@ -128,7 +132,7 @@ export class UI {
     }
 
     this.upgradeButtons.innerHTML = "";
-    const categories = ["Vehicles", "Parts", "Economy", "Map"];
+    const categories = ["Vehicles", "Parts", "Evolution", "Economy", "Map"];
     for (const category of categories) {
       const upgrades = UPGRADES.filter((upgrade) => (upgrade.category ?? "Run") === category);
       if (upgrades.length > 0) {
@@ -173,7 +177,7 @@ export class UI {
     this.combo.textContent = `x${Math.max(1, game.economy.combo || 1)}`;
     this.time.textContent = formatTime(game.runTime);
     const breakInfo = game.getBreakInfo();
-    this.phase.textContent = breakInfo.active ? `Shop ${breakInfo.remaining}s` : "Jam";
+    this.phase.textContent = breakInfo.active ? `Shop ${breakInfo.remaining}s` : game.spawner.getPhaseLabel(game.runTime, game.chickens);
     this.shopPanel.classList.toggle("visible", breakInfo.active && game.mode === "playing");
     this.interest.textContent = `Interest +$${game.economy.lastInterest}`;
     this.shopTimer.textContent = `${breakInfo.remaining || 15}s`;
@@ -224,9 +228,12 @@ export class UI {
       const capped = level >= upgrade.maxLevel;
       const cost = game.upgrades.getUpgradeCost(upgrade);
       const canBuy = game.upgrades.canBuy(upgrade);
+      const missingVehicle = upgrade.requiresVehicle && !game.upgrades.isVehicleUnlocked(upgrade.requiresVehicle);
       button.disabled = game.mode !== "playing" || !breakInfo.active || !canBuy;
       if (upgrade.id === "restockWire" && game.upgrades.stats.barbedWire > 0) {
         price.textContent = "Stocked";
+      } else if (missingVehicle) {
+        price.textContent = "Locked";
       } else if (capped) {
         price.textContent = upgrade.instant ? "Used" : "Maxed";
       } else {

@@ -84,7 +84,16 @@ export class Game {
     }
 
     this.runTime += dt;
-    if (this.runTime >= this.nextBreakAt) {
+    const spawnEvents = this.spawner.updateEvents(this.runTime, this.chickens, this.upgrades, this.effects);
+    if (spawnEvents.heraldKilledWave?.reward) {
+      this.economy.cash += spawnEvents.heraldKilledWave.reward;
+      this.economy.totalEarned += spawnEvents.heraldKilledWave.reward;
+      this.effects.flashText(`+$${spawnEvents.heraldKilledWave.reward}`, WORLD.width * 0.5, 126, "#32ca63");
+    }
+    if (spawnEvents.completedWave) {
+      this.effects.flashText("Blitz survived.", WORLD.width * 0.5, 158, "#fff26b");
+    }
+    if (this.runTime >= this.nextBreakAt && !this.spawner.blocksBreak(this.runTime, this.chickens)) {
       this.startShopBreak();
       return;
     }
@@ -202,7 +211,9 @@ export class Game {
 
   startShopBreak() {
     this.breakRemaining = WORLD.breakSeconds;
-    this.nextBreakAt += WORLD.playSecondsBeforeBreak;
+    do {
+      this.nextBreakAt += WORLD.playSecondsBeforeBreak;
+    } while (this.nextBreakAt <= this.runTime);
     const interest = this.economy.applyInterest(this.upgrades.stats.interestMultiplier, this.upgrades.stats.breakGrant);
     this.recoverEscapes();
     this.effects.flashText("Shop break!", WORLD.width * 0.5, 110, "#fff26b");

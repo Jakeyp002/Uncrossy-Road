@@ -69,7 +69,7 @@ export const VEHICLES = {
     speed: 475,
     length: 124,
     height: 42,
-    damage: 4,
+    damage: 1,
     color: "#f56f41",
     accent: "#f8faf7",
     rarity: "uncommon"
@@ -230,6 +230,31 @@ export const CHICKENS = {
     explodeOnDeath: true,
     chance: 0
   },
+  cash: {
+    id: "cash",
+    name: "Cash Chicken",
+    description: "Rare golden bird worth a fat payout. It is about half as common as an eggsplode chicken.",
+    hp: 1,
+    radius: 16,
+    speed: 114,
+    reward: 25,
+    color: "#fff0a6",
+    accent: "#32ca63",
+    chance: 0
+  },
+  blitz: {
+    id: "blitz",
+    name: "Blitz Chicken",
+    description: "Big rainbow herald that appears five seconds before a blitz and drops your defense cash early.",
+    hp: 3,
+    radius: 24,
+    speed: 78,
+    reward: 0,
+    color: "#fff7da",
+    accent: "#ff4f8a",
+    chance: 0,
+    rainbow: true
+  },
   boss: {
     id: "boss",
     name: "Boss Chicken",
@@ -296,8 +321,8 @@ export const UPGRADES = [
   {
     id: "truckCooldown",
     category: "Parts",
-    title: "Truck Rush",
-    text: "-30% truck cooldown",
+    title: "Truck Power",
+    text: "+1 truck damage",
     baseCost: 22,
     maxLevel: 3
   },
@@ -381,5 +406,41 @@ export const UPGRADES = [
     text: "-35% plow cooldown",
     baseCost: 28,
     maxLevel: 3
+  },
+  {
+    id: "truckEvo",
+    category: "Evolution",
+    title: "Armored Truck",
+    text: "truck damage becomes pure shield damage",
+    baseCost: 125,
+    maxLevel: 1,
+    requiresVehicle: "truck"
+  },
+  {
+    id: "busEvo",
+    category: "Evolution",
+    title: "Stretch Bus",
+    text: "bus grows longer with every hit",
+    baseCost: 125,
+    maxLevel: 1,
+    requiresVehicle: "bus"
+  },
+  {
+    id: "plowEvo",
+    category: "Evolution",
+    title: "Ice Plow",
+    text: "plow hits freeze chickens for 3 seconds",
+    baseCost: 125,
+    maxLevel: 1,
+    requiresVehicle: "plow"
+  },
+  {
+    id: "roadblockEvo",
+    category: "Evolution",
+    title: "Hunter Eagle",
+    text: "40% chance to carry off enemies it fails to one-shot",
+    baseCost: 125,
+    maxLevel: 1,
+    requiresVehicle: "roadblock"
   },
 ];

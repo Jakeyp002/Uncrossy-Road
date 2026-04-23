@@ -34,6 +34,7 @@ export class Renderer {
     this.drawRoad(ctx);
     this.drawActors(ctx);
     this.drawEffects(ctx);
+    this.drawWaveOverlay(ctx);
     this.drawBreakBanner(ctx);
     ctx.restore();
 
@@ -74,6 +75,7 @@ export class Renderer {
       chickenItems: game.chickens.items,
       projectiles: game.chickens.projectiles,
       vehicleItems: game.vehicles.items,
+      decals: game.effects.decals,
       particles: game.effects.particles,
       popups: game.effects.popups,
       laneBursts: game.effects.laneBursts
@@ -87,6 +89,7 @@ export class Renderer {
       game.chickens.items = scene.chickens;
       game.chickens.projectiles = scene.projectiles ?? [];
       game.vehicles.items = scene.vehicles;
+      game.effects.decals = [];
       game.effects.particles = [];
       game.effects.popups = [];
       game.effects.laneBursts = [];
@@ -108,6 +111,7 @@ export class Renderer {
       game.chickens.items = originalState.chickenItems;
       game.chickens.projectiles = originalState.projectiles;
       game.vehicles.items = originalState.vehicleItems;
+      game.effects.decals = originalState.decals;
       game.effects.particles = originalState.particles;
       game.effects.popups = originalState.popups;
       game.effects.laneBursts = originalState.laneBursts;
@@ -138,7 +142,7 @@ export class Renderer {
       maxHp: chickenType.hp,
       hp: chickenType.hp,
       reward: chickenType.reward,
-      shieldTier: typeId === "boss" ? 0 : typeId === "mud" ? 2 : 0,
+      shieldTier: typeId === "runner" ? 1 : 0,
       eggCooldown: 0,
       crackTimer: 0,
       dead: false,
@@ -182,6 +186,7 @@ export class Renderer {
       reward: this.game.chickenTypes[typeId].reward,
       shieldTier: extra.shieldTier ?? 0,
       crackTimer: extra.crackTimer ?? 0,
+      freezeTimer: extra.freezeTimer ?? 0,
       dead: false,
       escaped: false,
       eggCooldown: extra.eggCooldown ?? 0
@@ -244,9 +249,9 @@ export class Renderer {
         chickens: [
           chicken("runner", 780, 1, { shieldTier: 1 }),
           chicken("eggsplode", 835, 2),
-          chicken("mud", 910, 2, { shieldTier: 2 }),
+          chicken("mud", 910, 2),
           chicken("doomscroller", 680, 3),
-          chicken("mother", 870, 4, { shieldTier: 3, hp: 2, maxHp: 2 }),
+          chicken("mother", 870, 4, { hp: 2, maxHp: 2 }),
           chicken("boss", 1040, 6, { hp: 20, maxHp: 20 })
         ],
         projectiles: [egg(760, laneY(4) - 50)]
@@ -261,7 +266,7 @@ export class Renderer {
           chicken("runner", 710, 2, { shieldTier: 1 }),
           chicken("tough", 830, 4, { hp: 2, maxHp: 2 }),
           chicken("jumper", 960, 5),
-          chicken("mud", 1030, 5, { shieldTier: 2 })
+          chicken("mud", 1030, 5)
         ]
       },
       "scene-gameover": {
@@ -557,6 +562,7 @@ export class Renderer {
       ctx.fillRect(-20, -26, (34 * chicken.hp) / chicken.maxHp, 2);
     }
     this.drawChickenCracks(ctx, chicken);
+    this.drawFreezeOverlay(ctx, chicken);
     ctx.restore();
   }
 
@@ -571,8 +577,9 @@ export class Renderer {
 
     ctx.fillStyle = "#5f3e2c";
     ctx.fillRect(-8, -30, 16, 8);
-    this.block(ctx, -6, -26, 12, 12, 5, type.color);
-    this.block(ctx, -9, -12, 18, 27, 6, "#f7f5ff");
+    const frozen = chicken.freezeTimer > 0;
+    this.block(ctx, -6, -26, 12, 12, 5, frozen ? "#dff7ff" : type.color);
+    this.block(ctx, -9, -12, 18, 27, 6, frozen ? "#f3fdff" : "#f7f5ff");
 
     ctx.fillStyle = type.accent;
     ctx.fillRect(-11, -8, 4, 18);
@@ -591,6 +598,7 @@ export class Renderer {
     ctx.fillRect(13, -1, 5, 9);
     ctx.fillStyle = "#ff4f8a";
     ctx.fillRect(18, -1, 1.5, 9);
+    this.drawFreezeOverlay(ctx, chicken, 0.72);
     ctx.restore();
   }
 
@@ -629,6 +637,7 @@ export class Renderer {
       ctx.fillRect(28, 5, 6, 8);
     }
     this.drawChickenCracks(ctx, chicken, 0.9);
+    this.drawFreezeOverlay(ctx, chicken, 0.9);
     ctx.restore();
   }
 
@@ -638,7 +647,7 @@ export class Renderer {
     ctx.rotate(projectile.life * 2.2);
     ctx.fillStyle = "rgba(0,0,0,0.16)";
     ctx.fillRect(-18, 18, 36, 10);
-    ctx.fillStyle = "#fff8df";
+    ctx.fillStyle = "#fffef7";
     ctx.fillRect(-14, -20, 28, 40);
     ctx.fillStyle = "#f3c23b";
     ctx.fillRect(-6, -8, 12, 16);
@@ -750,6 +759,76 @@ export class Renderer {
       ctx.restore();
     }
 
+    for (const decal of this.game.effects.decals) {
+      ctx.save();
+      ctx.translate(decal.x, decal.y);
+      ctx.rotate(decal.spin);
+      ctx.globalAlpha = Math.min(0.9, decal.life / 1.4);
+      if (decal.type === "phone") {
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.42, -decal.size * 0.72, decal.size * 0.84, decal.size * 1.44);
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.22, -decal.size * 0.38, decal.size * 0.44, decal.size * 0.72);
+        ctx.fillStyle = "#ff4f8a";
+        ctx.fillRect(-decal.size * 0.08, -decal.size * 0.3, decal.size * 0.16, decal.size * 0.12);
+      } else if (decal.type === "crackedEgg") {
+        ctx.fillStyle = "#f8faf7";
+        ctx.fillRect(-decal.size * 0.78, -decal.size * 0.28, decal.size * 1.56, decal.size * 0.56);
+        ctx.fillRect(-decal.size * 0.5, -decal.size * 0.46, decal.size * 0.32, decal.size * 0.18);
+        ctx.fillRect(decal.size * 0.18, -decal.size * 0.42, decal.size * 0.28, decal.size * 0.16);
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.88, -decal.size * 0.18, decal.size * 0.26, decal.size * 0.12);
+        ctx.fillRect(decal.size * 0.52, -decal.size * 0.12, decal.size * 0.24, decal.size * 0.1);
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.14, -decal.size * 0.1, decal.size * 0.28, decal.size * 0.28);
+        ctx.strokeStyle = "#d9dee2";
+        ctx.lineWidth = Math.max(1.5, decal.size * 0.06);
+        ctx.beginPath();
+        ctx.moveTo(-decal.size * 0.54, -decal.size * 0.18);
+        ctx.lineTo(-decal.size * 0.3, -decal.size * 0.34);
+        ctx.lineTo(-decal.size * 0.08, -decal.size * 0.18);
+        ctx.moveTo(decal.size * 0.22, -decal.size * 0.26);
+        ctx.lineTo(decal.size * 0.4, -decal.size * 0.38);
+        ctx.lineTo(decal.size * 0.56, -decal.size * 0.18);
+        ctx.moveTo(-decal.size * 0.28, -decal.size * 0.72);
+        ctx.lineTo(-decal.size * 0.18, -decal.size * 0.96);
+        ctx.lineTo(-decal.size * 0.08, -decal.size * 0.72);
+        ctx.moveTo(0, -decal.size * 0.8);
+        ctx.lineTo(decal.size * 0.1, -decal.size * 1.02);
+        ctx.lineTo(decal.size * 0.2, -decal.size * 0.8);
+        ctx.moveTo(decal.size * 0.26, -decal.size * 0.72);
+        ctx.lineTo(decal.size * 0.34, -decal.size * 0.94);
+        ctx.lineTo(decal.size * 0.44, -decal.size * 0.72);
+        ctx.stroke();
+      } else if (decal.type === "yolk") {
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.82, -decal.size * 0.22, decal.size * 1.64, decal.size * 0.44);
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.28, -decal.size * 0.28, decal.size * 0.56, decal.size * 0.56);
+      } else if (decal.type === "shell") {
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.6, -decal.size * 0.2, decal.size * 0.44, decal.size * 0.26);
+        ctx.fillRect(decal.size * 0.12, -decal.size * 0.12, decal.size * 0.42, decal.size * 0.22);
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.1, decal.size * 0.04, decal.size * 0.18, decal.size * 0.12);
+      } else if (decal.type === "mud") {
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.7, -decal.size * 0.24, decal.size * 1.4, decal.size * 0.48);
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.16, -decal.size * 0.38, decal.size * 0.32, decal.size * 0.18);
+      } else if (decal.type === "feather") {
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.1, -decal.size * 0.62, decal.size * 0.2, decal.size * 1.24);
+        ctx.fillRect(-decal.size * 0.44, -decal.size * 0.16, decal.size * 0.88, decal.size * 0.18);
+      } else {
+        ctx.fillStyle = decal.color;
+        ctx.fillRect(-decal.size * 0.8, -decal.size * 0.26, decal.size * 1.6, decal.size * 0.52);
+        ctx.fillStyle = decal.accent;
+        ctx.fillRect(-decal.size * 0.18, -decal.size * 0.14, decal.size * 0.36, decal.size * 0.28);
+      }
+      ctx.restore();
+    }
+
     for (const particle of this.game.effects.particles) {
       ctx.save();
       ctx.translate(particle.x, particle.y);
@@ -802,6 +881,59 @@ export class Renderer {
       ctx.fillText(popup.text, 0, 0);
       ctx.restore();
     }
+  }
+
+  drawWaveOverlay(ctx) {
+    const warning = this.game.spawner.getWarningState(this.game.runTime);
+    if (!warning) return;
+
+    const roadTop = WORLD.roadTop - 20;
+    const roadHeight = WORLD.roadBottom - WORLD.roadTop + 40;
+    const stripeWidth = 96;
+    const alpha =
+      warning.mode === "active"
+        ? 0.24
+        : 0.08 + (warning.progress ?? 0) * 0.12 + Math.sin(performance.now() * 0.015) * 0.02;
+    const baseColor = warning.mode === "active" ? "#ff7a38" : "#e94742";
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(0, roadTop, WORLD.width, roadHeight);
+
+    ctx.globalAlpha = alpha * 0.85;
+    for (let x = -120; x < WORLD.width + 180; x += stripeWidth) {
+      ctx.save();
+      ctx.translate(x + (warning.mode === "active" ? performance.now() * 0.03 : 0), roadTop);
+      ctx.rotate(-0.45);
+      ctx.fillStyle = "#fff26b";
+      ctx.fillRect(0, 0, 30, roadHeight * 1.8);
+      ctx.restore();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#17201f";
+    ctx.fillRect(WORLD.width * 0.5 - 212, roadTop + 14, 424, 76);
+    ctx.strokeStyle = "#fff26b";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(WORLD.width * 0.5 - 212, roadTop + 14, 424, 76);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#fff8df";
+    ctx.font = "900 28px Inter, system-ui, sans-serif";
+    ctx.fillText(
+      warning.mode === "active" ? `${warning.label.toUpperCase()}  ${warning.seconds}s` : `${(warning.text ?? `${warning.label} incoming`).toUpperCase()}  ${warning.seconds}`,
+      WORLD.width * 0.5,
+      roadTop + 44
+    );
+    ctx.font = "900 18px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#fff26b";
+    ctx.fillText(
+      warning.mode === "active" ? warning.text ?? "Mud closed. Blitz in progress." : "Light red flash. Mud is about to close.",
+      WORLD.width * 0.5,
+      roadTop + 72
+    );
+    ctx.restore();
   }
 
   drawBreakBanner(ctx) {
@@ -880,6 +1012,21 @@ export class Renderer {
   }
 
   getChickenPalette(type, chicken) {
+    if (chicken.freezeTimer > 0) {
+      return { body: "#dff7ff", head: "#f3fdff", accent: "#5cb9ff" };
+    }
+    if (type.rainbow) {
+      const phase = chicken.wobble * 0.9;
+      const rainbow = [
+        { body: "#ff637d", head: "#ffb3c1", accent: "#7f1d1d" },
+        { body: "#ffb347", head: "#ffe0a3", accent: "#92400e" },
+        { body: "#fff26b", head: "#fff9b3", accent: "#8a6d1d" },
+        { body: "#39d96a", head: "#9df0b5", accent: "#166534" },
+        { body: "#4fb8ff", head: "#b8e3ff", accent: "#1d4ed8" },
+        { body: "#a66cff", head: "#ddc2ff", accent: "#6d28d9" }
+      ];
+      return rainbow[Math.floor((phase % (Math.PI * 2)) / ((Math.PI * 2) / rainbow.length))] ?? rainbow[0];
+    }
     if (!chicken.shieldTier) {
       return { body: type.color, head: type.color, accent: type.accent };
     }
@@ -890,6 +1037,20 @@ export class Renderer {
       { body: "#e94742", head: "#ff9a96", accent: "#7f1d1d" }
     ];
     return tiers[chicken.shieldTier - 1] ?? { body: type.color, head: type.color, accent: type.accent };
+  }
+
+  drawFreezeOverlay(ctx, chicken, scale = 1) {
+    if (!chicken.freezeTimer || chicken.freezeTimer <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(0.72, 0.22 + chicken.freezeTimer / 6);
+    ctx.strokeStyle = "#f3fdff";
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeRect(-23 * scale, -33 * scale, 57 * scale, 55 * scale);
+    ctx.fillStyle = "rgba(243, 253, 255, 0.55)";
+    ctx.fillRect(-18 * scale, -28 * scale, 10 * scale, 5 * scale);
+    ctx.fillRect(6 * scale, -32 * scale, 14 * scale, 5 * scale);
+    ctx.fillRect(-3 * scale, 12 * scale, 20 * scale, 4 * scale);
+    ctx.restore();
   }
 
   drawChickenCracks(ctx, chicken, scale = 1) {

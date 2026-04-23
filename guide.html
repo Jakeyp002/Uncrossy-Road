@@ -194,11 +194,11 @@
               <td data-label="Vehicle">Truck</td>
               <td data-label="Hotkey"><span class="pill">2</span></td>
               <td data-label="Cost">$10 after buying Unlock Truck for $45</td>
-              <td data-label="Cooldown">0.78 seconds, lowered by Truck Rush</td>
+              <td data-label="Cooldown">0.78 seconds</td>
               <td data-label="Speed">475</td>
-              <td data-label="Damage">4</td>
+              <td data-label="Damage">1, +1 per Truck Power</td>
               <td data-label="Coverage">Wider, one lane</td>
-              <td data-label="Best Use">Heavy single-lane hitter once unlocked from the Vehicles shelf.</td>
+              <td data-label="Best Use">Single-lane hitter that scales into pure shield damage with Armored Truck.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Bus</td>
@@ -208,7 +208,7 @@
               <td data-label="Speed">365</td>
               <td data-label="Damage">3</td>
               <td data-label="Coverage">Long one-lane sweep, extended by Long Bus</td>
-              <td data-label="Best Use">Unlock it mid-run to start clearing long crowded lanes.</td>
+              <td data-label="Best Use">Unlock it mid-run to clear crowded lanes. Stretch Bus makes it grow with each hit.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Snow Plow</td>
@@ -218,7 +218,7 @@
               <td data-label="Speed">235</td>
               <td data-label="Damage">3</td>
               <td data-label="Coverage">Slow sweep across two paired lanes</td>
-              <td data-label="Best Use">Two-lane pressure relief once you can afford the unlock.</td>
+              <td data-label="Best Use">Two-lane pressure relief. Ice Plow freezes anything it hits for 3 seconds.</td>
             </tr>
             <tr>
               <td data-label="Vehicle">Sky Eagle</td>
@@ -228,7 +228,7 @@
               <td data-label="Speed">285</td>
               <td data-label="Damage">1</td>
               <td data-label="Coverage">Original eagle-style sweep across four lanes, 3 uses per run</td>
-              <td data-label="Best Use">Late-run rescue buy that flies nose-first across four lanes.</td>
+              <td data-label="Best Use">Late-run rescue buy. Hunter Eagle can carry off enemies it fails to one-shot.</td>
             </tr>
           </tbody>
         </table>
@@ -304,8 +304,17 @@
               <td data-label="Special Rule">Carries a volatile egg. If traffic kills it, the egg explodes, destroys the vehicle that hit it, and breaks your combo chain.</td>
             </tr>
             <tr>
+              <td data-label="Chicken">Cash Chicken</td>
+              <td data-label="Appears">About 2.5% after 0:30</td>
+              <td data-label="Health">1</td>
+              <td data-label="Speed">114</td>
+              <td data-label="Reward">$25</td>
+              <td data-label="Escape Damage">1</td>
+              <td data-label="Special Rule">Golden bird with a big payout. Roughly half as common as an eggsplode chicken.</td>
+            </tr>
+            <tr>
               <td data-label="Chicken">Doomscroller</td>
-              <td data-label="Appears">About 1 in 12 spawns after 2:00</td>
+              <td data-label="Appears">Around 1 in 15 after 2:00, then ramps up</td>
               <td data-label="Health">1</td>
               <td data-label="Speed">126</td>
               <td data-label="Reward">$0</td>
@@ -332,7 +341,8 @@
             </tr>
           </tbody>
         </table>
-        <p class="note">Shielded birds can start appearing after 1:30. They are rare at first, ramp up over time, cracking a layer pays cash immediately, and their body color shows the current layer: green, blue, purple, then red, with purple and red kept especially rare.</p>
+        <p class="note">Only basic Chickens can be shielded. Their shield timeline is: green can begin at 0:30, blue at 1:00, purple at 2:00, and the shield rate ramps hard by 3:00. After 3:00, almost every basic Chicken should be shielded, with higher colors still rarer.</p>
+        <p class="note">At 3:45 a rainbow Blitz Chicken appears alone on the road. Kill it to earn $75 and start the five second warning countdown; if it survives, the blitz still begins on schedule. During the blitz, shielded Chickens are capped at green.</p>
       </section>
 
       <section>
@@ -384,11 +394,11 @@
               <td data-label="Effect">Small car cost is multiplied by 0.70 each level, with a $3 minimum.</td>
             </tr>
             <tr>
-              <td data-label="Upgrade">Truck Rush</td>
+              <td data-label="Upgrade">Truck Power</td>
               <td data-label="Category">Parts</td>
               <td data-label="Price">$33, $50, $74</td>
               <td data-label="Max">3</td>
-              <td data-label="Effect">Truck cooldown is multiplied by 0.70 each level.</td>
+              <td data-label="Effect">Truck damage increases by +1 each level.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Long Bus</td>
@@ -403,6 +413,34 @@
               <td data-label="Price">$42, $63, $95</td>
               <td data-label="Max">3</td>
               <td data-label="Effect">Snow plow cooldown is multiplied by 0.65 each level.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Armored Truck</td>
+              <td data-label="Category">Evolution</td>
+              <td data-label="Price">$125</td>
+              <td data-label="Max">1, requires Truck</td>
+              <td data-label="Effect">Truck becomes at least 3 damage, and that damage becomes pure shield damage, so it can knock red shields down to green.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Stretch Bus</td>
+              <td data-label="Category">Evolution</td>
+              <td data-label="Price">$125</td>
+              <td data-label="Max">1, requires Bus</td>
+              <td data-label="Effect">Every enemy the bus hits makes that bus longer, helping high-combo runs keep rolling.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Ice Plow</td>
+              <td data-label="Category">Evolution</td>
+              <td data-label="Price">$125</td>
+              <td data-label="Max">1, requires Plow</td>
+              <td data-label="Effect">Anything the plow hits freezes for 3 seconds and turns icy.</td>
+            </tr>
+            <tr>
+              <td data-label="Upgrade">Hunter Eagle</td>
+              <td data-label="Category">Evolution</td>
+              <td data-label="Price">$125</td>
+              <td data-label="Max">1, requires Eagle</td>
+              <td data-label="Effect">If the eagle does not one-shot an enemy, it has a 40% chance to carry it away.</td>
             </tr>
             <tr>
               <td data-label="Upgrade">Loose Change</td>
@@ -462,7 +500,7 @@
             </tr>
           </tbody>
         </table>
-        <p class="note">Upgrade prices now start at the boosted price immediately. Economy upgrades use base price x 2^(level+1), while Vehicles, Parts, and Map upgrades use base price x 1.5^(level+1), rounded to the nearest dollar.</p>
+        <p class="note">Upgrade prices now start at the boosted price immediately. Economy upgrades use base price x 2^(level+1), while Vehicles, Parts, and Map upgrades use base price x 1.5^(level+1), rounded to the nearest dollar. Evolutions cost exactly $125 and only unlock after their vehicle is bought.</p>
       </section>
     </main>
   </body>

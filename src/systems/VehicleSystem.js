@@ -39,11 +39,30 @@ export class VehicleSystem {
         if (rectsOverlap(vehicleBox, chickens.getAliveBounds(chicken))) {
           vehicle.hitIds.add(chicken.id);
           const chickenType = chickens.getType(chicken);
+          if (vehicle.type === "plow" && this.upgrades.isVehicleEvolved("plow")) {
+            chickens.freeze(chicken, 3);
+          }
+          const oneTapExpected = chicken.shieldTier <= 0 && vehicle.damage >= chicken.hp;
           const damage =
             chickenType.oneTapImmune && vehicle.damage >= chicken.maxHp
               ? Math.max(1, Math.floor(chicken.maxHp * 0.2))
               : vehicle.damage;
-          chickens.hit(chicken, damage, "vehicle", vehicle, this);
+          chickens.hit(chicken, damage, "vehicle", vehicle, this, {
+            pureShieldDamage: vehicle.type === "truck" && this.upgrades.isVehicleEvolved("truck")
+          });
+          if (vehicle.type === "bus" && this.upgrades.isVehicleEvolved("bus")) {
+            vehicle.length = Math.min(vehicle.length + 14, this.upgrades.getVehicleLength("bus") + 240);
+          }
+          if (
+            vehicle.type === "roadblock" &&
+            this.upgrades.isVehicleEvolved("roadblock") &&
+            !oneTapExpected &&
+            !chicken.dead &&
+            !chickenType.oneTapImmune &&
+            Math.random() < 0.4
+          ) {
+            chickens.carryOff(chicken);
+          }
         }
       }
     }
@@ -115,7 +134,7 @@ export class VehicleSystem {
       laneSpan: config.laneSpan ?? 1,
       length,
       height,
-      damage: config.damage,
+      damage: this.upgrades.getVehicleDamage(type),
       hitIds: new Set(),
       bob: 0,
       destroyed: false,

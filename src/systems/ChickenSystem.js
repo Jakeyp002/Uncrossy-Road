@@ -16,6 +16,7 @@ export class ChickenSystem {
     this.escaped = 0;
     this.nextId = 1;
     this.seenTypes = new Set();
+    this.killedTypes = [];
   }
 
   getSpawnModifiers(typeId, runTime) {
@@ -26,18 +27,38 @@ export class ChickenSystem {
 
   rollShieldTier(typeId, runTime) {
     const type = CHICKENS[typeId];
-    if (!type || typeId === "doomscroller" || typeId === "boss") return 0;
-    if (runTime < 90) return 0;
+    if (!type || typeId !== "runner") return 0;
+    if (runTime < 30) return 0;
 
-    const elapsed = runTime - 90;
-    const shieldChance = Math.min(0.78, 0.04 * Math.pow(2, elapsed / 45));
+    let shieldChance = 0.08;
+    let weights = [1];
+    if (runTime < 60) {
+      shieldChance = 0.08 + ((runTime - 30) / 30) * 0.05;
+      weights = [1];
+    } else if (runTime < 120) {
+      shieldChance = 0.14 + ((runTime - 60) / 60) * 0.08;
+      weights = [0.82, 0.18];
+    } else if (runTime < 150) {
+      shieldChance = 0.24 + ((runTime - 120) / 30) * 0.07;
+      weights = [0.74, 0.21, 0.05];
+    } else if (runTime < 180) {
+      const bossRamp = (runTime - 150) / 30;
+      shieldChance = 0.55 + bossRamp * 0.35;
+      weights = [0.55, 0.32, 0.13];
+    } else {
+      const late = runTime - 180;
+      shieldChance = Math.min(0.98, 0.9 + 0.08 * (1 - Math.exp(-late / 45)));
+      weights = [0.42, 0.32, 0.19, 0.07];
+    }
     if (Math.random() >= shieldChance) return 0;
 
     const rarityRoll = Math.random();
-    if (rarityRoll < 0.72) return 1;
-    if (rarityRoll < 0.94) return 2;
-    if (rarityRoll < 0.99) return 3;
-    return 4;
+    let threshold = 0;
+    for (let index = 0; index < weights.length; index += 1) {
+      threshold += weights[index];
+      if (rarityRoll <= threshold) return index + 1;
+    }
+    return weights.length;
   }
 
   spawn(typeId, difficulty = 0, options = {}) {
@@ -64,7 +85,8 @@ export class ChickenSystem {
       squash: 0,
       eggCooldown: type.eggCooldown ?? 0,
       shieldTier: options.shieldTier ?? 0,
-      crackTimer: 0
+      crackTimer: 0,
+      freezeTimer: 0
     };
     chicken.baseX = chicken.x;
     this.nextId += 1;
@@ -99,12 +121,28 @@ export class ChickenSystem {
     this.effects.flashText("BOSS CLEARS ROAD", WORLD.width * 0.5, WORLD.roadTop + 28, "#ffdf65");
   }
 
+  clearForHerald() {
+    if (this.items.length === 0 && this.projectiles.length === 0) return;
+    this.items = [];
+    this.projectiles = [];
+    this.effects.shake(8);
+  }
+
+  clearType(typeId) {
+    this.items = this.items.filter((chicken) => chicken.typeId !== typeId);
+  }
+
   update(dt, difficulty, vehicles) {
     for (const chicken of this.items) {
       if (chicken.dead) continue;
       chicken.wobble += chicken.wobbleSpeed * dt;
       chicken.squash = Math.max(0, chicken.squash - dt * 8);
       chicken.crackTimer = Math.max(0, chicken.crackTimer - dt);
+      chicken.freezeTimer = Math.max(0, chicken.freezeTimer - dt);
+      if (chicken.freezeTimer > 0) {
+        this.checkBarbedWire(chicken);
+        continue;
+      }
       const zig = Math.sin(chicken.wobble) * 16 * chicken.panic;
       chicken.x += (chicken.vx + zig) * dt;
       const surfaceMultiplier = this.getSurfaceMultiplier(chicken);
@@ -197,11 +235,12 @@ export class ChickenSystem {
     this.effects.flashText("MEGA EGG!", chicken.x, chicken.y - 34, "#fff8df");
   }
 
-  hit(chicken, damage, source = "vehicle", vehicle = null, vehicles = null) {
+  hit(chicken, damage, source = "vehicle", vehicle = null, vehicles = null, options = {}) {
     if (chicken.dead) return;
     if (chicken.shieldTier > 0) {
       const crackedTier = chicken.shieldTier;
-      chicken.shieldTier = Math.max(0, chicken.shieldTier - 1);
+      const shieldDamage = options.pureShieldDamage ? Math.max(1, damage) : 1;
+      chicken.shieldTier = Math.max(0, chicken.shieldTier - shieldDamage);
       chicken.squash = 1;
       chicken.crackTimer = 0.4;
       this.economy.cash += crackedTier;
@@ -219,6 +258,23 @@ export class ChickenSystem {
 
   getType(chicken) {
     return CHICKENS[chicken.typeId];
+  }
+
+  freeze(chicken, seconds = 3) {
+    if (!chicken || chicken.dead || chicken.escaped) return;
+    chicken.freezeTimer = Math.max(chicken.freezeTimer ?? 0, seconds);
+    chicken.squash = 0.8;
+    this.effects.flashText("FROZEN", chicken.x, chicken.y - 42, "#dff7ff");
+  }
+
+  carryOff(chicken) {
+    if (!chicken || chicken.dead || chicken.escaped) return;
+    chicken.dead = true;
+    this.killedTypes.push(chicken.typeId);
+    const payout = this.economy.earnSplat(chicken.reward, this.upgrades.stats.bonusCash);
+    this.effects.flashText("SNATCHED!", chicken.x, chicken.y - 46, "#fff26b");
+    this.effects.splat(chicken.x, chicken.y, payout.amount, payout.combo, chicken.typeId);
+    this.audio.splat(payout.combo);
   }
 
   splat(chicken, extraDamage = 0, source = "vehicle", vehicle = null, vehicles = null) {
@@ -239,6 +295,7 @@ export class ChickenSystem {
     }
     chicken.hp -= extraDamage;
     chicken.dead = true;
+    this.killedTypes.push(type.id);
     if (type.explodeOnDeath && source === "vehicle") {
       if (vehicle && vehicles) {
         vehicles.destroyVehicle(vehicle, chicken.x, chicken.y, "explode");
@@ -250,7 +307,7 @@ export class ChickenSystem {
     }
     const reward = source === "roadblock" ? Math.max(6, Math.round(chicken.reward * 0.65)) : chicken.reward;
     const payout = this.economy.earnSplat(reward, this.upgrades.stats.bonusCash);
-    this.effects.splat(chicken.x, chicken.y, payout.amount, payout.combo);
+    this.effects.splat(chicken.x, chicken.y, payout.amount, payout.combo, chicken.typeId);
     this.audio.splat(payout.combo);
   }
 
@@ -261,6 +318,21 @@ export class ChickenSystem {
       w: chicken.radius * 2,
       h: chicken.radius * 2
     };
+  }
+
+  hasBossActive() {
+    return this.items.some((chicken) => chicken.typeId === "boss" && !chicken.dead && !chicken.escaped);
+  }
+
+  hasTypeActive(typeId) {
+    return this.items.some((chicken) => chicken.typeId === typeId && !chicken.dead && !chicken.escaped);
+  }
+
+  consumeKilledType(typeId) {
+    const index = this.killedTypes.indexOf(typeId);
+    if (index === -1) return false;
+    this.killedTypes.splice(index, 1);
+    return true;
   }
 
   getSurfaceMultiplier(chicken) {

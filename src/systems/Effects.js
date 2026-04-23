@@ -5,6 +5,7 @@ export class Effects {
   constructor() {
     this.particles = [];
     this.popups = [];
+    this.decals = [];
     this.shakeTime = 0;
     this.shakeStrength = 0;
     this.laneBursts = [];
@@ -13,6 +14,7 @@ export class Effects {
   reset() {
     this.particles = [];
     this.popups = [];
+    this.decals = [];
     this.shakeTime = 0;
     this.shakeStrength = 0;
     this.laneBursts = [];
@@ -37,13 +39,31 @@ export class Effects {
     }
     this.popups = this.popups.filter((popup) => popup.life > 0);
 
+    for (const decal of this.decals) {
+      decal.life -= dt;
+    }
+    this.decals = this.decals.filter((decal) => decal.life > 0);
+
     for (const burst of this.laneBursts) {
       burst.life -= dt;
     }
     this.laneBursts = this.laneBursts.filter((burst) => burst.life > 0);
   }
 
-  splat(x, y, amount, combo) {
+  addDecal(type, x, y, options = {}) {
+    this.decals.push({
+      type,
+      x,
+      y,
+      size: options.size ?? 18,
+      color: options.color ?? COLORS.white,
+      accent: options.accent ?? COLORS.ink,
+      life: options.life ?? 10,
+      spin: options.spin ?? rand(-0.25, 0.25)
+    });
+  }
+
+  splat(x, y, amount, combo, typeId = "runner") {
     this.shake(5 + Math.min(10, combo));
     this.popups.push({
       x,
@@ -66,6 +86,17 @@ export class Effects {
         spin: rand(0, Math.PI * 2),
         spinSpeed: rand(-7, 7)
       });
+    }
+
+    this.addDecal("crackedEgg", x + rand(-8, 8), y + rand(6, 14), {
+      size: rand(20, 28),
+      color: "#f3c23b",
+      accent: "#fff8df",
+      life: 10
+    });
+
+    if (typeId === "cash") {
+      this.flashText("JACKPOT!", x, y - 48, "#fff26b");
     }
   }
 
@@ -94,6 +125,13 @@ export class Effects {
         spinSpeed: rand(-7, 7)
       });
     }
+
+    this.addDecal("phone", x + rand(-8, 8), y + rand(2, 12), {
+      size: 18,
+      color: "#101820",
+      accent: "#39d9cc",
+      life: 15
+    });
   }
 
   eggSmash(x, y, brokeVehicle = false) {
@@ -138,6 +176,13 @@ export class Effects {
         });
       }
     }
+
+    this.addDecal("yolk", x + rand(-10, 10), y + rand(0, 8), {
+      size: brokeVehicle ? 24 : 20,
+      color: "#f3c23b",
+      accent: "#fff8df",
+      life: brokeVehicle ? 14 : 11
+    });
   }
 
   bombBurst(x, y) {
@@ -165,6 +210,13 @@ export class Effects {
         spinSpeed: rand(-9, 9)
       });
     }
+
+    this.addDecal("shell", x + rand(-8, 8), y + rand(-2, 8), {
+      size: 22,
+      color: "#fff8df",
+      accent: "#f3c23b",
+      life: 13
+    });
   }
 
   shieldBreak(x, y, remainingTier) {
