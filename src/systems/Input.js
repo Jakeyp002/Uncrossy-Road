@@ -5,8 +5,11 @@ export class Input {
     this.canvas = canvas;
     this.game = game;
     this.point = null;
+    this.mobilePointer = null;
     canvas.addEventListener("pointerdown", (event) => this.onPointerDown(event));
     canvas.addEventListener("pointermove", (event) => this.onPointerMove(event));
+    canvas.addEventListener("pointerup", (event) => this.onPointerUp(event));
+    canvas.addEventListener("pointercancel", () => this.onPointerCancel());
     canvas.addEventListener("pointerleave", () => this.onPointerLeave());
     window.addEventListener("keydown", (event) => this.onKeyDown(event));
   }
@@ -15,6 +18,17 @@ export class Input {
     this.game.audio.resume();
     const point = worldFromPointer(event, this.canvas, this.game.world);
     const lane = this.game.lanes.getLaneAt(point.y);
+    if (this.usesPhoneControls() && lane) {
+      this.mobilePointer = {
+        id: event.pointerId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        lane
+      };
+      this.canvas.setPointerCapture?.(event.pointerId);
+      this.game.lanes.setHoverFromPoint(point);
+      return;
+    }
     if (lane) {
       this.game.deploySelected(lane);
     }
@@ -25,9 +39,39 @@ export class Input {
     this.game.lanes.setHoverFromPoint(this.point);
   }
 
+  onPointerUp(event) {
+    if (!this.mobilePointer || this.mobilePointer.id !== event.pointerId) return;
+    const pointer = this.mobilePointer;
+    this.mobilePointer = null;
+    this.canvas.releasePointerCapture?.(event.pointerId);
+    const direction = this.getMobileDirection(pointer, event);
+    this.game.setVehicleDirection(direction);
+    this.game.deploySelected(pointer.lane);
+  }
+
+  onPointerCancel() {
+    this.mobilePointer = null;
+  }
+
   onPointerLeave() {
+    if (this.mobilePointer) return;
     this.point = null;
     this.game.lanes.setHoverFromPoint(null);
+  }
+
+  usesPhoneControls() {
+    return document.body.classList.contains("phone-ui");
+  }
+
+  getMobileDirection(pointer, event) {
+    const swipeX = event.clientX - pointer.startClientX;
+    const swipeY = event.clientY - pointer.startClientY;
+    if (Math.abs(swipeX) > 28 && Math.abs(swipeX) > Math.abs(swipeY) * 1.15) {
+      return swipeX > 0 ? 1 : -1;
+    }
+    const bounds = this.canvas.getBoundingClientRect();
+    const tapX = pointer.startClientX - bounds.left;
+    return tapX < bounds.width * 0.5 ? 1 : -1;
   }
 
   onKeyDown(event) {

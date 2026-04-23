@@ -88,13 +88,6 @@ export class Effects {
       });
     }
 
-    this.addDecal("crackedEgg", x + rand(-8, 8), y + rand(6, 14), {
-      size: rand(24, 32),
-      color: "#f3c23b",
-      accent: "#fff8df",
-      life: 10
-    });
-
     if (typeId === "cash") {
       this.flashText("JACKPOT!", x, y - 48, "#fff26b");
     }
