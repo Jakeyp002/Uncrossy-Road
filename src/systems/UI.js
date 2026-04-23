@@ -101,7 +101,7 @@ export class UI {
     this.startButton.addEventListener("click", () => this.game.startRun());
     this.tutorialStartButton.addEventListener("click", () => this.game.startRun());
     this.guideButton.addEventListener("click", () => {
-      window.location.href = "./guide.html?v=3.0";
+      window.location.href = "./guide.html?v=3.1";
     });
     this.tutorialButton.addEventListener("click", () => this.showTutorial());
     this.tutorialBackButton.addEventListener("click", () => this.showMenu());

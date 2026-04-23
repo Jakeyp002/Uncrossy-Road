@@ -10,7 +10,7 @@ export class Renderer {
     this.assets = {
       crackedEgg: new Image()
     };
-    this.assets.crackedEgg.src = "./assets/cracked-egg-sprite.svg?v=3.0";
+    this.assets.crackedEgg.src = "./assets/cracked-egg-sprite.svg?v=3.1";
     this.resize();
     window.addEventListener("resize", () => this.resize());
   }
