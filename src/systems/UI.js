@@ -92,14 +92,16 @@ export class UI {
     this.tutorialBody = document.querySelector("#tutorialBody");
     this.tutorialImage = document.querySelector("#tutorialImage");
     this.tutorialTags = document.querySelector("#tutorialTags");
+    this.phoneModeToggle = document.querySelector("#phoneModeToggle");
     this.activeInfoUpgrade = null;
     this.tutorialIndex = 0;
     this.gameOverDexRevealed = false;
+    this.initPhoneMode();
     this.renderButtons();
     this.startButton.addEventListener("click", () => this.game.startRun());
     this.tutorialStartButton.addEventListener("click", () => this.game.startRun());
     this.guideButton.addEventListener("click", () => {
-      window.location.href = "./guide.html";
+      window.location.href = "./guide.html?v=3.0";
     });
     this.tutorialButton.addEventListener("click", () => this.showTutorial());
     this.tutorialBackButton.addEventListener("click", () => this.showMenu());
@@ -112,6 +114,41 @@ export class UI {
         this.revealGameOverDex();
       }
     });
+  }
+
+  initPhoneMode() {
+    const prefersPhoneLayout = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+    const savedMode = this.getSavedPhoneMode();
+    const enabled = savedMode ? savedMode === "on" : prefersPhoneLayout;
+    this.setPhoneMode(enabled);
+    this.phoneModeToggle?.addEventListener("click", () => {
+      const next = !document.body.classList.contains("phone-ui");
+      this.savePhoneMode(next);
+      this.setPhoneMode(next);
+    });
+  }
+
+  getSavedPhoneMode() {
+    try {
+      return window.localStorage.getItem("uncrossyPhoneMode");
+    } catch {
+      return null;
+    }
+  }
+
+  savePhoneMode(enabled) {
+    try {
+      window.localStorage.setItem("uncrossyPhoneMode", enabled ? "on" : "off");
+    } catch {
+      // The toggle still works for this session if browser storage is unavailable.
+    }
+  }
+
+  setPhoneMode(enabled) {
+    document.body.classList.toggle("phone-ui", enabled);
+    if (!this.phoneModeToggle) return;
+    this.phoneModeToggle.setAttribute("aria-pressed", String(enabled));
+    this.phoneModeToggle.textContent = enabled ? "Laptop UI" : "Phone UI";
   }
 
   renderButtons() {
@@ -132,7 +169,7 @@ export class UI {
     }
 
     this.upgradeButtons.innerHTML = "";
-    const categories = ["Vehicles", "Parts", "Evolution", "Economy", "Map"];
+    const categories = ["Vehicles", "Evolution", "Parts", "Economy", "Map"];
     for (const category of categories) {
       const upgrades = UPGRADES.filter((upgrade) => (upgrade.category ?? "Run") === category);
       if (upgrades.length > 0) {
@@ -225,15 +262,22 @@ export class UI {
       const upgrade = UPGRADES.find((item) => item.id === button.dataset.upgrade);
       const level = game.upgrades.levels[upgrade.id];
       const price = button.querySelector(".upgrade-price");
+      const icon = button.querySelector(".upgrade-icon");
+      const info = button.closest(".upgrade-tile")?.querySelector(".info-button");
       const capped = level >= upgrade.maxLevel;
       const cost = game.upgrades.getUpgradeCost(upgrade);
       const canBuy = game.upgrades.canBuy(upgrade);
       const missingVehicle = upgrade.requiresVehicle && !game.upgrades.isVehicleUnlocked(upgrade.requiresVehicle);
+      if (icon) {
+        icon.textContent = missingVehicle ? "???" : UPGRADE_ICONS[upgrade.id] ?? "UP";
+      }
+      button.title = missingVehicle ? "???" : upgrade.title;
+      if (info) info.title = missingVehicle ? "???" : upgrade.title;
       button.disabled = game.mode !== "playing" || !breakInfo.active || !canBuy;
       if (upgrade.id === "restockWire" && game.upgrades.stats.barbedWire > 0) {
         price.textContent = "Stocked";
       } else if (missingVehicle) {
-        price.textContent = "Locked";
+        price.textContent = "???";
       } else if (capped) {
         price.textContent = upgrade.instant ? "Used" : "Maxed";
       } else {
@@ -328,6 +372,10 @@ export class UI {
 
   showUpgradeInfo(upgrade) {
     this.activeInfoUpgrade = upgrade.id;
+    if (upgrade.requiresVehicle && !this.game.upgrades.isVehicleUnlocked(upgrade.requiresVehicle)) {
+      this.shopInfo.textContent = "???: Buy the matching vehicle unlock first.";
+      return;
+    }
     this.shopInfo.textContent = `${upgrade.title}: ${upgrade.text}`;
   }
 }

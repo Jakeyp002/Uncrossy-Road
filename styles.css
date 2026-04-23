@@ -81,8 +81,12 @@ body {
   bottom: auto;
   width: min(520px, calc(100vw - 32px));
   max-height: calc(100vh - 116px);
+  max-height: calc(100dvh - 116px);
   padding: 7px;
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  -webkit-overflow-scrolling: touch;
   background: rgba(255, 249, 223, 0.96);
   border: 4px solid #17201f;
   box-shadow: 0 10px 0 rgba(23, 32, 31, 0.22), 0 0 0 3px rgba(255, 242, 107, 0.42);
@@ -91,6 +95,24 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.break-shop::-webkit-scrollbar,
+.modal::-webkit-scrollbar {
+  width: 10px;
+}
+
+.break-shop::-webkit-scrollbar-track,
+.modal::-webkit-scrollbar-track {
+  background: rgba(23, 32, 31, 0.1);
+  border-radius: 8px;
+}
+
+.break-shop::-webkit-scrollbar-thumb,
+.modal::-webkit-scrollbar-thumb {
+  background: #17201f;
+  border: 2px solid #fff9df;
+  border-radius: 8px;
 }
 
 .break-shop.visible {
@@ -571,6 +593,31 @@ button:disabled {
   margin-top: 6px;
 }
 
+.phone-mode-toggle {
+  display: none;
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 3;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 3px solid #17201f;
+  border-radius: 8px;
+  background: #fff9df;
+  color: #17201f;
+  box-shadow: 0 5px 0 rgba(23, 32, 31, 0.18);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.phone-mode-toggle[aria-pressed="true"] {
+  background: #39d9cc;
+}
+
+.phone-ui .phone-mode-toggle {
+  display: block;
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -643,13 +690,16 @@ button:disabled {
 .modal {
   width: min(760px, 100%);
   max-height: min(92vh, 760px);
+  max-height: min(92dvh, 760px);
   padding: 16px 16px 18px;
   text-align: center;
   border-radius: 8px;
   background: #fff9df;
   border: 4px solid #17201f;
   box-shadow: 0 18px 0 rgba(23, 32, 31, 0.28);
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overlay-view[hidden] {
@@ -1287,5 +1337,208 @@ button:disabled {
 
   .button-sub {
     font-size: 10px;
+  }
+}
+
+.phone-ui .break-shop {
+  top: max(72px, calc(env(safe-area-inset-top) + 64px));
+  width: min(520px, calc(100vw - 10px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  max-width: calc(100vw - 10px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  max-height: calc(100vh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 5px;
+  border-width: 3px;
+}
+
+.phone-ui .bottom-right {
+  display: none;
+}
+
+.phone-ui .shop-header {
+  position: sticky;
+  top: -5px;
+  z-index: 2;
+  margin: -5px -5px 5px;
+  padding: 5px 7px;
+}
+
+.phone-ui .panel-title {
+  font-size: 17px;
+}
+
+.phone-ui #interest,
+.phone-ui #shopTimer {
+  font-size: 12px;
+}
+
+.phone-ui #shopTimer {
+  min-width: 42px;
+  padding: 4px 6px;
+}
+
+.phone-ui .shop-info {
+  min-height: 18px;
+  margin-bottom: 5px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+.phone-ui .upgrade-buttons {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.phone-ui .shop-category {
+  min-height: 18px;
+  padding: 2px 4px;
+  font-size: 10px;
+}
+
+.phone-ui .upgrade-tile {
+  min-width: 0;
+  min-height: 48px;
+}
+
+.phone-ui .upgrade-buy {
+  min-height: 48px;
+  padding: 6px 16px 6px 30px;
+  border-width: 2px;
+}
+
+.phone-ui .upgrade-icon {
+  left: -6px;
+  width: 34px;
+  height: 32px;
+  border-width: 2px;
+  font-size: 9px;
+  border-radius: 7px;
+}
+
+.phone-ui .upgrade-price {
+  max-width: 100%;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.phone-ui .info-button {
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.phone-ui .overlay {
+  padding: max(10px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  place-items: center;
+}
+
+.phone-ui .modal {
+  width: min(760px, calc(100vw - 12px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  max-height: calc(100vh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 12px;
+  box-shadow: 0 10px 0 rgba(23, 32, 31, 0.28);
+}
+
+.phone-ui .modal h1 {
+  font-size: 34px;
+}
+
+.phone-ui .tagline {
+  font-size: 14px;
+}
+
+.phone-ui .small {
+  font-size: 11px;
+}
+
+.phone-ui .chicken-dex {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.phone-ui .dex-card {
+  min-height: 0;
+  padding: 6px;
+  border-width: 2px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.phone-ui .dex-photo-img {
+  height: 44px;
+  margin-bottom: 5px;
+  border-width: 2px;
+}
+
+.phone-ui .dex-card strong {
+  font-size: 11px;
+}
+
+.phone-ui .dex-card span {
+  font-size: 9px;
+  line-height: 1.12;
+}
+
+.phone-ui .splash-card {
+  width: calc(100vw - 18px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  height: calc(100vh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: calc(100dvh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  transform: rotate(0deg);
+}
+
+.phone-ui .splash-caption {
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 9px 10px;
+}
+
+.phone-ui .splash-caption strong {
+  font-size: 20px;
+}
+
+.phone-ui .snapshot-photo {
+  height: 154px;
+}
+
+@media (max-width: 380px) {
+  .phone-ui .break-shop {
+    width: calc(100vw - 6px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-width: calc(100vw - 6px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    padding: 4px;
+  }
+
+  .phone-ui .shop-header {
+    top: -4px;
+    margin: -4px -4px 4px;
+  }
+
+  .phone-ui .upgrade-buttons {
+    gap: 3px;
+  }
+
+  .phone-ui .upgrade-buy {
+    padding-left: 27px;
+    padding-right: 14px;
+  }
+
+  .phone-ui .upgrade-icon {
+    width: 31px;
+    height: 30px;
+    font-size: 8px;
+  }
+
+  .phone-ui .upgrade-price {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  .phone-mode-toggle {
+    display: block;
   }
 }

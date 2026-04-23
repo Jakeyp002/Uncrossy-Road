@@ -21,6 +21,7 @@ Open `http://localhost:5173/`.
 - Use up/down arrows or `W/S` to choose a lane, then press `Space` to deploy.
 - Use left/right arrows or `A/D` to switch vehicle direction.
 - Buy run-shop upgrades with current cash during shop breaks.
+- Evolution upgrades cost $125, appear as `???` until their vehicle is unlocked, and only apply to truck, bus, plow, and eagle.
 - Press `Space` or `Enter` from the menu or game-over screen to restart.
 - Mud lanes slow chickens to 25% speed, and run upgrades can make mud even stickier.
 - Every 30 seconds of action triggers a 15 second shop break.

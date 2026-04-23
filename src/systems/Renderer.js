@@ -7,6 +7,10 @@ export class Renderer {
     this.ctx = canvas.getContext("2d");
     this.game = game;
     this.dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    this.assets = {
+      crackedEgg: new Image()
+    };
+    this.assets.crackedEgg.src = "./assets/cracked-egg-sprite.svg?v=3.0";
     this.resize();
     window.addEventListener("resize", () => this.resize());
   }
@@ -772,34 +776,7 @@ export class Renderer {
         ctx.fillStyle = "#ff4f8a";
         ctx.fillRect(-decal.size * 0.08, -decal.size * 0.3, decal.size * 0.16, decal.size * 0.12);
       } else if (decal.type === "crackedEgg") {
-        ctx.fillStyle = "#f8faf7";
-        ctx.fillRect(-decal.size * 0.78, -decal.size * 0.28, decal.size * 1.56, decal.size * 0.56);
-        ctx.fillRect(-decal.size * 0.5, -decal.size * 0.46, decal.size * 0.32, decal.size * 0.18);
-        ctx.fillRect(decal.size * 0.18, -decal.size * 0.42, decal.size * 0.28, decal.size * 0.16);
-        ctx.fillStyle = decal.accent;
-        ctx.fillRect(-decal.size * 0.88, -decal.size * 0.18, decal.size * 0.26, decal.size * 0.12);
-        ctx.fillRect(decal.size * 0.52, -decal.size * 0.12, decal.size * 0.24, decal.size * 0.1);
-        ctx.fillStyle = decal.color;
-        ctx.fillRect(-decal.size * 0.14, -decal.size * 0.1, decal.size * 0.28, decal.size * 0.28);
-        ctx.strokeStyle = "#d9dee2";
-        ctx.lineWidth = Math.max(1.5, decal.size * 0.06);
-        ctx.beginPath();
-        ctx.moveTo(-decal.size * 0.54, -decal.size * 0.18);
-        ctx.lineTo(-decal.size * 0.3, -decal.size * 0.34);
-        ctx.lineTo(-decal.size * 0.08, -decal.size * 0.18);
-        ctx.moveTo(decal.size * 0.22, -decal.size * 0.26);
-        ctx.lineTo(decal.size * 0.4, -decal.size * 0.38);
-        ctx.lineTo(decal.size * 0.56, -decal.size * 0.18);
-        ctx.moveTo(-decal.size * 0.28, -decal.size * 0.72);
-        ctx.lineTo(-decal.size * 0.18, -decal.size * 0.96);
-        ctx.lineTo(-decal.size * 0.08, -decal.size * 0.72);
-        ctx.moveTo(0, -decal.size * 0.8);
-        ctx.lineTo(decal.size * 0.1, -decal.size * 1.02);
-        ctx.lineTo(decal.size * 0.2, -decal.size * 0.8);
-        ctx.moveTo(decal.size * 0.26, -decal.size * 0.72);
-        ctx.lineTo(decal.size * 0.34, -decal.size * 0.94);
-        ctx.lineTo(decal.size * 0.44, -decal.size * 0.72);
-        ctx.stroke();
+        this.drawCrackedEggDecal(ctx, decal);
       } else if (decal.type === "yolk") {
         ctx.fillStyle = decal.accent;
         ctx.fillRect(-decal.size * 0.82, -decal.size * 0.22, decal.size * 1.64, decal.size * 0.44);
@@ -881,6 +858,22 @@ export class Renderer {
       ctx.fillText(popup.text, 0, 0);
       ctx.restore();
     }
+  }
+
+  drawCrackedEggDecal(ctx, decal) {
+    const sprite = this.assets.crackedEgg;
+    const width = decal.size * 4.4;
+    const height = decal.size * 2.42;
+    if (sprite.complete && sprite.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(sprite, -width * 0.5, -height * 0.58, width, height);
+      return;
+    }
+
+    ctx.fillStyle = "#fffdf0";
+    ctx.fillRect(-decal.size * 0.78, -decal.size * 0.28, decal.size * 1.56, decal.size * 0.56);
+    ctx.fillStyle = "#ffd93b";
+    ctx.fillRect(-decal.size * 0.24, -decal.size * 0.16, decal.size * 0.48, decal.size * 0.36);
   }
 
   drawWaveOverlay(ctx) {

@@ -2,17 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Uncrossy Road" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Uncrossy Road</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=3.0" />
   </head>
   <body>
     <main id="app">
       <canvas id="game" aria-label="Uncrossy Road arcade game"></canvas>
 
       <section class="hud top-left" aria-label="Run stats">
-        <div class="brand"><span>UNCROSSY ROAD</span><span class="version-tag">v2.8</span></div>
+        <div class="brand"><span>UNCROSSY ROAD</span><span class="version-tag">v3.0</span></div>
         <div class="stat-row">
           <span>Cash</span>
           <strong id="cash">$0</strong>
@@ -55,6 +58,10 @@
         <p>Tap a road lane to launch the selected vehicle.</p>
         <p>1-5 switch vehicles. WASD or arrows steer row and direction. Space deploys.</p>
       </section>
+
+      <button id="phoneModeToggle" class="phone-mode-toggle" type="button" aria-pressed="false" title="Toggle phone UI">
+        Phone UI
+      </button>
 
       <section id="overlay" class="overlay visible" aria-live="polite">
         <div id="gameOverSplashView" class="overlay-view gameover-splash" hidden>
@@ -106,6 +113,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/main.js?v=2.8"></script>
+    <script type="module" src="./src/main.js?v=3.0"></script>
   </body>
 </html>
